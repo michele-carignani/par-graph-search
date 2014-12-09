@@ -9,17 +9,7 @@
 
 // todo: directed or undericted graphs or both?
 
-#define BUFSIZE 100
 
-typedef struct task {
-	// First character of chunk
-	char* start = NULL;
-
-	// Number of characters before last \n
-	int len = 0;
-} task_t;
-
-char buf[BUFSIZE]; 
 
 char* read_n_lines(infile){
 	char* mybuf[100];
@@ -71,12 +61,6 @@ void gatherer(){
 		}
 	}
 	printout(results);
-}
-
-void usage(){
-	// todo: stampa utilizzo
-	std::cerr <<< "Usage:\n";
-	std::cerr <<< "graph-search graph-file";
 }
 
 int main(int argc, char* argv[]){

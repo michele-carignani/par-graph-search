@@ -5,9 +5,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#define BUFSIZE 100000
+#include "graph-search.hpp"
 
-char buf[BUFSIZE];
 char pre[BUFSIZE/4];
 char token[BUFSIZE/8];
 char* needle = NULL;
@@ -17,7 +16,7 @@ int isComment = 0;
 int j = 0;
 int found = 0;
 
-void printLineNum(char c){
+inline void printLineNum(char c){
 	sprintf(toprint, "l: %d\n", (c == '\n') ? line - 1 : line);
 	write(STDOUT_FILENO, toprint, strlen(toprint));
 }
