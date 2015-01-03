@@ -3,6 +3,9 @@
 *
 */
 
+#include <string>
+#include <list>
+
 #ifndef GRAPH_SEARCH_HPP
 #define GRAPH_SEARCH_HPP
 
@@ -28,6 +31,34 @@ public:
 	bytes_task(int st, int si): start(st), size(si) {} 
 } bytes_task_t;
 
-char buf[BUFSIZE]; 
+typedef struct single_line_task {
+    single_line_task(): line(""), linenum(-1) {};
+    single_line_task(std::string l, int ln): line(l), linenum(ln) {};
+    std::string line;
+    int linenum;
+} single_task_t;
+
+typedef struct multi_lines_task {
+    private:
+    int size = 1;
+    int count = 0;
+
+    public:
+    multi_lines_task(int size){
+        lines = new single_task_t[size];
+    };
+
+    void add_task(std::string line, int num){
+        lines[count].linenum = num;
+        lines[count].line = std::string(line);
+        count++;
+    }
+    
+    int get_count(){
+        return count;
+    }
+
+    single_task_t* lines;
+} multi_task_t;
 
 #endif

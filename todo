@@ -1,0 +1,10 @@
+
+- settare la affinity dei thread sui core (forse è meglio spalmarli su core diversi che su diversi contesti dello stesso core)
+
+different configurations
+ 	1. trova se il nodo c'è o no
+	2. trova i link con quel nodo
+
+directed or undericted graphs or both?
+
+verbose and quiet modes?
