@@ -37,13 +37,13 @@ all-mic: seq-mic farm-mic pipe-farm-mic map-mic
 
 # TESTS
 
-DATASET = berk.txt
+DATASET = web-BerkStan.txt
 NEEDLES_FILE = web-BerkStan.txt.needles
 DATASET_NEEDLES = 255680 254913 450698 438238
 
 test-scale:
 	make all
-	bash test/scalability-test.sh data/$(DATASET) data/$(NEEDLES_FILE)
+	bash tests/scalability-test.sh data/$DATASET data/$NEEDLES_FILE
 
 tests-simple-par:
 	make simple-par
@@ -56,4 +56,4 @@ tests-simple-par-mic:
 		echo "Test $(DATASET) with par deg " $$num1; \
 		ssh mic0 'time ./simple-par-mic ./$(DATASET) $$num1  $(DATASET_NEEDLES) > /dev/null' ; \
 		((num1 = num1 * 2)) ; \
-	done
+	done	
