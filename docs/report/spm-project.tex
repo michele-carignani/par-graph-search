@@ -1,0 +1,102 @@
+\documentclass[11pt]{article}
+\usepackage{geometry}                % See geometry.pdf to learn the layout options. There are lots.
+\geometry{a4paper}                   % ... or a4paper or a5paper or ... 
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{epstopdf}
+\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
+
+\title{\textbf{Parallel Graph Search} \\ SPM project report}
+\author{Michele Carignani}
+%\date{}                                           % Activate to display a given date or no date
+
+\begin{document}
+\maketitle
+\section{Introduction}
+
+The aim of this report is to describe the design and results of the project of SPM. First we will describe the problem to be solved, give some definitions and terminologies. Then we will analyze the possible parallelization strategies and try to define a cost analysis. Then the implementation with the parallel framework FastFlow will be given.
+
+
+\section{Graph search}
+
+% Graph search Search a given item in a (large) graph in parallel. The graph to be searched should be produced using the SNAP library from Stanford (available at snap.stanford.edu/snap/). The application should search the large graph for a single node or for a set of nodes.
+
+The project aims to design and analyze a \textbf{parallel solution for the graph search problem} as stated in the project specification:
+
+\begin{quote}
+Search a given item in a (large) graph in parallel. The graph to be searched should be produced using the SNAP library from Stanford (available at snap.stanford.edu/snap/). The application should search the large graph for a single node or for a set of nodes.
+\end{quote}
+
+\paragraph{Notation} We recall that a graph is defined as a couple $(N, E)$ where $N$ is a set of nodes and $E$ is a set of edges connecting these nodes. We will use $n = \vert{N}\vert$ as the cardinality of $N$ and $e = \vert E \vert$ as the cardinality of $E$. The input of the problem is a graph $(N,E)$ and a list of $p$ indexes to look for.
+
+\paragraph{SNAP graphs format} The project specification requires that the graph to be searched should be generated through the SNAP graph library. % todo link to snap
+The library exports the graphs as a list of edges, i.e. as a text file where each line contains one edge,
+described with the strings of the numerical id of the source node and of the target node separated by a tabulation character.
+Note that, as stated in SNAP documentation, the numerical ids are unique for a node but are completely random and the edges list is not ordered.
+The datasets used for the project has been taken from a list of public graphs available here. %todo link.
+For the scope of searching a node in an edge list, it is of no importance if the graph is directed or undirected, so we will work as if the graph is not directed.
+
+\begin{figure}
+\begin{center}
+\begin{verbatim}
+# This is a comment
+234    \t  5712
+85     \t  213
+5712   \t  213
+\end{verbatim}
+\end{center}
+\begin{caption}
+Example of export file. The graph represented has $N=\{85, 234, 213, 5712\}$ and $E = \{(234, 5712), (85,213), (5712,213)\}$ assumed undirected.
+\end{caption}
+
+\end{figure}
+
+\paragraph{Algorithm} Since the graph is represented as an unordered list of edges and since the purpose of this project is to test the benefits of parallelization,  the simplest simple algorithm will be used to solve the search problem: scan of the file, parse each line and compare the node ids with the list of nodes to be searched.
+
+The pseudocode is trivial:
+\begin{verbatim}
+foreach( line in input_file):
+    (source, dest) = parse(line)
+        if check(source):
+            found(source)
+        if check(dest):
+            found(dest)
+\end{verbatim}
+
+The complexity of the algorithm in terms of comparisons is linear in the number of edges, therefore $e * 2 = O(e)$, since we are doing two comparisons per edge (line). Each comparison is done w.r.t. a list of $p$ items, so the cost of the \verb!check()!
+function is $O(p)$ assuming that the cost of comparing two strings of few characters is negligible.
+
+% todo: implement more complex comparisons
+
+\section{Parallel design and cost analysis}
+
+Under the assumptions stated above, the graph search problem is a data parallel problem. Our goal is to improve (reduce) the overall completion time over one single graph. In particular, we try to experimentally evaluate the speedup and the scalability of different parallel solutions w.r.t. the sequential version, using completion time as relevant metric.
+
+Since each line can be analyzed independently from the others, there is no data that need to be shared or communicated between parallel actors. The \textbf{optimal parallel degree} is therefore $n_{opt} = e * 2$ since each node id present in the file can be parsed and compared individually. The optimal computation grain would be 1 comparison per parallel executor.
+
+But because of the cost of communication % and IO ? todo
+the optimal parallel computation grain is too small to achieve good performances. Our tests will
+inspect the coarsest grain possible. % todo rivedere
+
+\subsection{Skeletons solutions}
+
+A synchronization free data parallel computation is naturally designed as a \textbf{map} computation.
+We will see two different skeletons: the map skeleton and the farm skeleton.
+
+\paragraph{Map} The map skeleton is easily applied to the simple graph search algorithm defined above. We execute in parallel different iterations of the for loop. A pseudocode would be:
+
+\begin{verbatim}
+parallel_for(0,  )
+\end{verbatim}
+
+\section{Implementation with FastFlow}
+
+\section{Experimental results}
+
+\subsection(Testing architecture and environment)
+
+\section{Conclusions}
+
+
+
+\end{document}  
