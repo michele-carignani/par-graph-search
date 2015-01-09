@@ -49,7 +49,7 @@ int main(int argc, char* argv[]){
         workers.push_back(w);
     }
 
-	ff_farm<> graph_search_farm(workers, em,  );
+	ff_farm<> graph_search_farm(workers, em);
 	
 	graph_search_farm.remove_collector();
 
