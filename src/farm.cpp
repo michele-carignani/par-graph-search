@@ -1,6 +1,5 @@
 /** \file: farm.cpp
-	\author Michele Carignani michele.carignani@gmail.com
-
+*   \author: Michele Carignani michele.carignani@gmail.com
 */
 #include <list>
 #include <iostream>
@@ -36,7 +35,8 @@ int main(int argc, char* argv[]){
     cout << "Workers num: " << nw << ", Granularity: " << g << " \n";
     #endif
     
-    ManyLinesEmitter* em = new ManyLinesEmitter(graph_file_path, g);
+    ManyLinesEmitter em (graph_file_path, g);
+    Collector col ();
 
 	vector<ff_node *> workers;
     for(int j = 0; j < nw; j++){
@@ -49,7 +49,7 @@ int main(int argc, char* argv[]){
         workers.push_back(w);
     }
 
-	ff_farm<> graph_search_farm(workers, em );
+	ff_farm<> graph_search_farm(workers, em,  );
 	
 	graph_search_farm.remove_collector();
 

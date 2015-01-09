@@ -1,9 +1,5 @@
 /** \file: utils.hpp
-*/
-
-/** \file: utils.cpp
-*
-*
+*	\author: Michele Carignani <michele.carignani@gmail.com>
 */
 
 #ifndef UTILS_HPP
@@ -24,6 +20,10 @@ int get_workers_num(int argc, char** argv);
 int get_granularity(int argc, char** argv);
 
 void get_conf(int argc, char** argv, char** gf, std::list<std::string>* ns, int* nw, int* g);
+
+bool is_set_par_deg(int argc);
+
+bool is_set_granularity(int argc);
 
 void parse_and_check_line(single_task_t task, std::list<std::string> needles);
 

@@ -1,3 +1,7 @@
+/** \file: pipe-farm.cpp
+*   \author: Michele Carignani@gmail.com
+*/
+
 #include <ff/farm.hpp>
 #include <ff/pipeline.hpp>
 #include <istream>

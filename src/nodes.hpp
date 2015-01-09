@@ -1,5 +1,5 @@
-/** \file:nodes.hpp
-    \author Michele Carignani michele.carignani@gmail.com
+/** \file: nodes.hpp
+*    \author: Michele Carignani michele.carignani@gmail.com
 */
 
 #include <ff/pipeline.hpp>
@@ -9,7 +9,6 @@
 #include <fstream>
 #include <list>
 #include <unordered_map>
-
 
 #ifndef _NODES_HPP
 #define _NODES_HPP
@@ -22,10 +21,7 @@ class ManyLinesEmitter : public ff::ff_node {
 
    public:
    void * svc(void  * t);
-   ManyLinesEmitter(char* pathname, int g) {
-        graph_file.open(pathname);
-        granularity = g;
-    };
+   ManyLinesEmitter(char* pathname, int g);
 
 };
 

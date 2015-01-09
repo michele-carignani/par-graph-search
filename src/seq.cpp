@@ -1,5 +1,5 @@
 /** \file: seq.cpp
-	\author Michele Carignani michele.carignani@gmail.com
+*	\author Michele Carignani <michele.carignani@gmail.com>
 */
 #include <fstream>
 #include <iostream>

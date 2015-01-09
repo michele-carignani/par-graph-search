@@ -1,5 +1,5 @@
 /** \file: nodes.cpp
-
+*	\author: Michele Carignani <michele.carignani@gmail.com>
 */
 #include "graph-search.hpp"
 #include "nodes.hpp"
@@ -7,7 +7,18 @@
 using namespace std;
 using namespace ff;
 
+ManyLinesEmitter::ManyLinesEmitter(char* pathname, int g){
+    graph_file.open(pathname);
+    if(!graph_file){
+        error("Errore apertura graph file");
+    }
+    granularity = g;
+}
+
 void* ManyLinesEmitter::svc(void * t){
+	if(!graph_file){
+		return EOS;
+	}
 	int i = 0;
        // cout << "Emitter\n";
        char *s = new char[100];

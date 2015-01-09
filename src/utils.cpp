@@ -1,5 +1,5 @@
 /** \file: utils.cpp
-*
+*   \author: Michele Carignani <michele.carignani@gmail.com>
 *
 */
 
@@ -11,28 +11,15 @@
 using namespace std;
 
 void usage(int argc, char** argv){
-    
     cout << "Usage: " << argv[0] << " <graph-file> <needles-file> <n-workers> <granularity>\n";
     exit(0);
-
 }
 
 void open_graph_file(int argc, char** argv, char** input_path) {
-
     if(argc < 2){
         usage(argc, argv);
     }
-
     *input_path = argv[1];
-    
-    /*
-    graph_file.open(filein);
-
-    if(!graph_file){
-        perror("Opening graph file");
-        exit(0);
-    }
-    */
 }
 
 void load_needles_list(int argc, char** argv, list<string>* needles){
@@ -72,6 +59,14 @@ int get_granularity(int argc, char** argv){
     return atoi(argv[4]);
 }
 
+bool is_set_par_deg(int argc){
+    return argc > 2;
+}
+
+bool is_set_granularity(int argc){
+    return argc > 3;
+}
+
 void get_conf(int argc, char** argv, char** gf, list<string>* ns, int* nw, int* g){
     open_graph_file(argc, argv, gf);
     load_needles_list(argc, argv, ns);
@@ -93,11 +88,9 @@ void parse_and_check_line(single_task_t task, list<string> needles){
            if((*it).compare(first) == 0){
                print_found_node(&task, *it);
            }
-
            if((*it).compare(second) == 0){
                print_found_node(&task, *it);
            }
-
        }
 }
 
