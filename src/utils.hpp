@@ -6,16 +6,29 @@
 *
 */
 
-#include "utils.hpp"
+#ifndef UTILS_HPP
+#define UTILS_HPP
 
-void check_usage(int argc, char** argv);
+#include <list>
+#include <string>
+#include "graph-search.hpp"
 
-void open_graph_file(int argc, char** argv, ifstream graph_file);
+void usage(int argc, char** argv);
 
-void load_needles_list(int argc, char** argv, list<string> needles);
+void open_graph_file(int argc, char** argv, char** graph_file);
 
-int get_workers_num(argc, argv);
+void load_needles_list(int argc, char** argv, std::list<std::string>* needles);
 
-int get_granularity(argc, argv);
+int get_workers_num(int argc, char** argv);
 
-void get_conf(int argc, char** argv, ifstream gf, list<string> ns, int* nw, int* g);
+int get_granularity(int argc, char** argv);
+
+void get_conf(int argc, char** argv, char** gf, std::list<std::string>* ns, int* nw, int* g);
+
+void parse_and_check_line(single_task_t task, std::list<std::string> needles);
+
+void print_found_node(single_task_t* t, std::string needle);
+
+float elapsed_time_secs(struct timespec from, struct timespec to);
+
+#endif // UTILS_HPP

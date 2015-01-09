@@ -5,13 +5,16 @@
 
 #include <string>
 #include <list>
+#include <time.h>
 
-#ifndef GRAPH_SEARCH_HPP
-#define GRAPH_SEARCH_HPP
+#ifndef _GRAPH_SEARCH_HPP
+#define _GRAPH_SEARCH_HPP
 
 #define BUFSIZE 10000
 #define TASK_SIZE 1000
 #define LEFT_BUF_SIZE 100
+#define DEFAULT_GRANULARITY 20
+#define DEFAULT_WORKERS_NUM 2
 
 typedef struct string_task {
 	// First character of chunk
@@ -28,10 +31,11 @@ typedef struct bytes_task {
 	int size = 0;
 
 public:
-	bytes_task(int st, int si): start(st), size(si) {} 
+	bytes_task(int st, int si): start(st), size(si) {}
 } bytes_task_t;
 
 typedef struct single_line_task {
+    public:
     single_line_task(): line(""), linenum(-1) {};
     single_line_task(std::string l, int ln): line(l), linenum(ln) {};
     std::string line;
@@ -53,7 +57,7 @@ typedef struct multi_lines_task {
         lines[count].line = std::string(line);
         count++;
     }
-    
+
     int get_count(){
         return count;
     }
