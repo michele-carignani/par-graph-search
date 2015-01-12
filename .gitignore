@@ -1,6 +1,7 @@
-
+Makefile
 build/*
 data/
 *.swp
 *.DS*
 *._*
+*.o

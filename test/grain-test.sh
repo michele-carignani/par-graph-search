@@ -8,11 +8,11 @@ PAR_DEGS="1 2 4 8 16 32 64 128"
 WORKERS_NUM=16
 
 par_test() {
-	$BUILD_DIR/$1 $2 $3 $4 $5 1>/dev/null
+	time $BUILD_DIR/$1 $2 $3 $4 $5 1>/dev/null 2>/dev/null
 }
 
 test_sequential(){
-    $BUILD_DIR/seq $1 $2 1>/dev/null
+    time $BUILD_DIR/seq $1 $2 1>/dev/null 2>/dev/null
 }
 
 usage(){
