@@ -1,7 +1,9 @@
-Makefile
+<<<<<<< HEAD
 build/*
 data/
 *.swp
 *.DS*
 *._*
 *.o
+Makefile
+docs/
