@@ -18,32 +18,34 @@ class ManyLinesEmitter : public ff::ff_node {
     int linenum = 0;
     int granularity = 20;
     std::ifstream graph_file;
+    float executed_secs = 0;
 
    public:
    void * svc(void  * t);
    ManyLinesEmitter(char* pathname, int g);
    ~ManyLinesEmitter() {};
+   void svc_end();
 
 };
 
 class ManyLinesWorker : public ff::ff_node {
     private:
     std::list<std::string>* needles;
-
+    float executed_secs = 0;
+    
     public:
     ManyLinesWorker (std::list<std::string>* ns) : needles(ns) {};
     ~ManyLinesWorker () {};
     void * svc(void* t);
     void parse_line(single_task_t task);
     virtual void found_node(int linenum, std::string needle);
+    void svc_end();
 
 };
 
 class PrinterWorker : public ManyLinesWorker {
-
-	public:
-    PrinterWorker(std::list<std::string>* ns) : ManyLinesWorker(ns) { 
-    };
+    public:
+    PrinterWorker(std::list<std::string>* ns) : ManyLinesWorker(ns) {};
     void found_node(int linenum, std::string needle);
 };
 
@@ -61,6 +63,7 @@ class HasherWorker : public ManyLinesWorker {
 */
 
 class Collector : public ff::ff_node {
+    float executed_secs = 0;
     public:
     std::list<std::string> found_nodes;
 
