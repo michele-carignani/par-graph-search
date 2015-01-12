@@ -98,7 +98,17 @@ void print_found_node(single_task_t* t, string needle){
     cout << "Trovato " << needle << " alla riga " << ((single_task_t*) t)->linenum << "\n";
 }
 
+// usa CLOCK_THREAD_CPUTIME_ID oppure CLOCK_PROCESS_CPUTIME_ID
+//
 float elapsed_time_secs(struct timespec from, struct timespec to){
-    float r = ((float)to.tv_nsec) - ((float)from.tv_nsec);
-    return r / ((1000.0) * (1000.0) * (1000.0));
+    long secs, nsecs;
+    if((to.tv_nsec - from.tv_nsec) < 0){
+        secs = to.tv_sec - from.tv_sec - 1;
+        nsecs = 1000000000 + to.tv_nsec - from.tv_nsec;
+    } else {
+        secs = to.tv_sec - from.tv_sec;
+        nsecs = to.tv_nsec - from.tv_nsec;
+    }
+    float r = (float) secs + (float) nsecs / ((1000.0) * (1000.0) * (1000.0));
+    return r;
 }

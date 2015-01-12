@@ -39,28 +39,28 @@ int main(int argc, char* argv[]){
 
     vector<ff_node *> workers;
     for(int j = 0; j < nw; j++){
-        ManyLinesWorker* w = new PrinterWorker(&needles);
-        
+        ManyLinesWorker* w = new ManyLinesWorker(&needles);
         #ifdef USE_AFFINITY
         w->setAffinity(j * 4);
-        #endif
-        
+        #endif     
         workers.push_back(w);
     }
-
-    ff_pipe<int> pipe(new ManyLinesEmitter(graph_file_path, g), new ff_farm<>(workers));
+    
+    ManyLinesEmitter emitter (graph_file_path, g);
+    ff_farm<> wfarm (workers);
+    wfarm.remove_collector();
+    Collector collector;
+    
+    ff_pipe<int> pipe(&emitter, &wfarm, &collector);
+    
     // pipe.wrap_around();
     pipe.cleanup_nodes();
-    if(pipe.run_and_wait_end()<0) error("running pipe");
-
-    //for(auto& x: results){
-    //    cout << x.first << ": " << x.second << "\n";
-    //} 
+    if(pipe.run_and_wait_end()<0) error("running pipe"); 
 
     clock_gettime(CLOCK_REALTIME, &end);
 
     cerr << elapsed_time_secs(start, end);
 
-	return 0;
+    return 0;
 }
 

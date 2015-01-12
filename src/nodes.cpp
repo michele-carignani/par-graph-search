@@ -21,11 +21,11 @@ void* ManyLinesEmitter::svc(void * t){
 	}
 	int i = 0;
        // cout << "Emitter\n";
-       char *s = new char[100];
+       char* s = new char[100];
        multi_task_t* tsk = new multi_task_t(granularity);
        graph_file.getline(s, 100);
        while(graph_file.gcount() != 0 && i < granularity){
-         // cout << "= " << s << "\n";
+          // cout << "= " << s << "\n";
           linenum++;
            tsk->add_task(string(s), linenum);
            graph_file.getline(s, 100);
@@ -34,10 +34,10 @@ void* ManyLinesEmitter::svc(void * t){
        if(i == 0 ) return EOS;
        // cout << "<< sendig out "<< t->get_count() <<" lines\n";
        ff_send_out(tsk);
+       delete[] s;
        if(i < granularity){
            return EOS;
         }
-        // cout << "<< finita svc emitter\n";
         return GO_ON;
 }
 
@@ -47,28 +47,44 @@ void* ManyLinesWorker::svc(void* t){
    for(int i = 0; i < task->get_count(); i++){
        parse_line(task->lines[i]);
    }
-
+   delete task;
    return (void*) GO_ON;
 }
 
 void ManyLinesWorker::parse_line(single_task_t task){
-	if(task.line[0] == '#') return;
+        if(task.line[0] == '#') return;
        string first = task.line.substr(0, task.line.find("\t"));
        string second = task.line.substr(task.line.find("\t") + 1, task.line.find("\r") - 1 - task.line.find("\t"));
        list<string>::iterator it;
        for(it = needles->begin(); it != needles->end(); it++){
-           // cout << "Comparo " << (*it) << " e " << first << " e " << second << "\n";
+            #ifdef DEBUG
+           cout << "Comparo " << (*it) << " e " << first << " e " << second << "\n";
+            #endif
            if((*it).compare(first) == 0){
-               found_node(&task, *it);
+               found_node(task.linenum, *it);
            }
            if((*it).compare(second) == 0){
-               found_node(&task, *it);
+               found_node(task.linenum, *it);
            }
        }
 }
 
-void PrinterWorker::found_node(void* t, string needle){
-    cout << "Trovato " << needle << " alla riga " << ((single_task_t*) t)->linenum << "\n";
+void ManyLinesWorker::found_node(int linenum, std::string needle){
+    char* line_num = new char[50];
+    sprintf(line_num, "%d :",linenum);
+    string* res = new string (line_num);
+    res->append(needle);
+    
+    #ifdef DEBUG
+    cout << "Mando " << res->c_str() << "\n";
+    #endif
+
+    ff_send_out(res);
+    delete[] line_num;
+}
+
+void PrinterWorker::found_node(int linenum, string needle){
+    cout << "Trovato " << needle << " alla riga " << linenum << "\n";
 }
 
 /*
@@ -79,9 +95,22 @@ void HasherWorker::found_node(void* t, string needle){
 */
 
 void * Collector::svc(void * t){
-    int res = *((int*) t);
+    string* res = (string*) t;
+    //cout << "ricevuto " << res->c_str() << "\n";
     // if(! found_nodes.contans(res)){}
-    found_nodes.push_back(res);
+    found_nodes.push_back(*res);
+    delete res;
+    return GO_ON;
+}
+
+void Collector::print_res(){
+    for(auto x: found_nodes){
+        cout << x << "\n";
+    }
+}
+
+void Collector::svc_end(){
+    print_res();
 }
 
 #ifdef DONT

@@ -5,6 +5,13 @@
 #include <iostream>
 #include <string>
 #include <list>
+#include <time.h>
+
+#ifdef __MACH__
+#include <mach/clock.h>
+#include <mach/mach.h>
+#endif
+
 #include "graph-search.hpp"
 #include "utils.hpp"
 

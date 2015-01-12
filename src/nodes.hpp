@@ -22,6 +22,7 @@ class ManyLinesEmitter : public ff::ff_node {
    public:
    void * svc(void  * t);
    ManyLinesEmitter(char* pathname, int g);
+   ~ManyLinesEmitter() {};
 
 };
 
@@ -31,9 +32,10 @@ class ManyLinesWorker : public ff::ff_node {
 
     public:
     ManyLinesWorker (std::list<std::string>* ns) : needles(ns) {};
+    ~ManyLinesWorker () {};
     void * svc(void* t);
     void parse_line(single_task_t task);
-    virtual void found_node(void* t, std::string needle){return;};
+    virtual void found_node(int linenum, std::string needle);
 
 };
 
@@ -42,7 +44,7 @@ class PrinterWorker : public ManyLinesWorker {
 	public:
     PrinterWorker(std::list<std::string>* ns) : ManyLinesWorker(ns) { 
     };
-    void found_node(void* t, std::string needle);
+    void found_node(int linenum, std::string needle);
 };
 
 /*
@@ -60,9 +62,11 @@ class HasherWorker : public ManyLinesWorker {
 
 class Collector : public ff::ff_node {
     public:
-    std::list<int> found_nodes;
+    std::list<std::string> found_nodes;
 
     void * svc(void * t);
+    void svc_end();
+    void print_res();
 };
 
 #endif // _NODES_HPP
