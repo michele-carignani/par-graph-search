@@ -30,7 +30,7 @@ echo "# Completion times in seconds of the different parallel and sequential ver
 echo "# using different computation grains and parallelism degree."
 echo "# First line describes the format of the CSV records (semicolon separated)."
 echo 
-echo "Linea di comando: $1 $2"
+echo "# Arguments: $1 $2"
 echo
 echo "Granularity; Program; 1; 2; 4; 8; 16; 32; 64"
 
@@ -52,4 +52,4 @@ for g in $GRANULARITIES ; do
     done
 done
 
-echo -e "\n-- TESTS COMPLETED -- "
+echo -e "\n# TESTS COMPLETED"
