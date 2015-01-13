@@ -1,8 +1,7 @@
-/* 
- * File:   farm-no-io.cpp
- * Author: miche
+/** 
+ * \file farm-no-io.cpp
+ * \author: michele.carignani@gmail.com
  *
- * Created on 12 gennaio 2015, 19.23
  */
 
 #include <cstdlib>

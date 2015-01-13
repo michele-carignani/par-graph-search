@@ -89,19 +89,6 @@ class PrinterWorker : public ManyLinesWorker {
     void found_node(int linenum, std::string needle);
 };
 
-/*
-class HasherWorker : public ManyLinesWorker {
-    private:
-
-	public:
-    std::unordered_multimap<int, int>* results;
-
-    HasherWorker(std::unordered_multimap<int, int> rs) : results(rs) {};
-
-    void found_node(void* t, std::string needle);
-};
-*/
-
 class Collector : public ff::ff_node {
     float executed_secs = 0;
     public:
@@ -113,24 +100,3 @@ class Collector : public ff::ff_node {
 };
 
 #endif // _NODES_HPP
-
-#ifdef NODEF
-
-class FileReader: public ff::ff_node {
-
-    int first = 0;
-    std::ifstream graph_file;
-
-    public:
-
-    int svc_init();
-    FileReader(std::ifstream gf): graph_file(gf) {};
-    bytes_task_t* svc(string_task_t* t);
-};
-
-
-class Graph_parser : ff_node_t<string_task_t> {
-    string_task_t* svc();
-};
-
-#endif

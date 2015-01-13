@@ -16,6 +16,7 @@
 using namespace ff;
 using namespace std;
 
+/** List of nodes to be looked for */
 list<string> needles;
 
 int main(int argc, char* argv[]){
@@ -35,6 +36,7 @@ int main(int argc, char* argv[]){
     cout << "Workers num: " << nw << ", Granularity: " << g << " \n";
     #endif 
 
+    /* Create workers */
     vector<ff_node *> workers;
     for(int j = 0; j < nw; j++){
         ManyLinesWorker* w = new ManyLinesWorker(needles);
@@ -51,7 +53,6 @@ int main(int argc, char* argv[]){
     
     ff_pipe<int> pipe(&emitter, &wfarm, &collector);
     
-    // pipe.wrap_around();
     pipe.cleanup_nodes();
     if(pipe.run_and_wait_end()<0) error("running pipe"); 
 
