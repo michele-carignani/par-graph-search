@@ -18,7 +18,7 @@ using namespace ff;
 list<string> needles;
 
 int main(int argc, char** argv){
-
+    
     vector<single_task_t> edgelist;
     ifstream graph_file;
     struct timespec start, all_read, end;
@@ -28,7 +28,7 @@ int main(int argc, char** argv){
     int nw, g, i;
 
     get_conf(argc, argv, &graph_filename, &needles, &nw, &g);
-
+    
     graph_file.open(graph_filename);
 
     clock_gettime(CLOCK_REALTIME, &start);

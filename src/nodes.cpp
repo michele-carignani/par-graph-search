@@ -52,7 +52,7 @@ void* ManyLinesEmitter::svc(void * t){
         return GO_ON;
 }
 
-/* */
+/*     EMITTERNOIO     */
 void EmitterNoIO::svc_end(){
 #ifdef PRINT_EXEC_TIME
     cerr << "Emitter executed " << executed_secs << " secs\n";

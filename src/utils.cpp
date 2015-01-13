@@ -60,11 +60,11 @@ int get_granularity(int argc, char** argv){
 }
 
 bool is_set_par_deg(int argc){
-    return argc > 2;
+    return argc > 3;
 }
 
 bool is_set_granularity(int argc){
-    return argc > 3;
+    return argc > 4;
 }
 
 void get_conf(int argc, char** argv, char** gf, list<string>* ns, int* nw, int* g){
