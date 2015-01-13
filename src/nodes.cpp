@@ -1,6 +1,8 @@
 /** \file: nodes.cpp
 *	\author: Michele Carignani <michele.carignani@gmail.com>
 */
+#include <vector>
+
 #include "graph-search.hpp"
 #include "nodes.hpp"
 #include "utils.hpp"
@@ -8,6 +10,7 @@
 using namespace std;
 using namespace ff;
 
+/*        MANY LINES EMITTER      */
 ManyLinesEmitter::ManyLinesEmitter(char* pathname, int g){
     graph_file.open(pathname);
     if(!graph_file){
@@ -49,6 +52,39 @@ void* ManyLinesEmitter::svc(void * t){
         return GO_ON;
 }
 
+/* */
+void EmitterNoIO::svc_end(){
+#ifdef PRINT_EXEC_TIME
+    cerr << "Emitter executed " << executed_secs << " secs\n";
+#endif
+}
+
+void* EmitterNoIO::svc(void* t){
+    struct timespec start, end;
+    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
+    int i = 0;
+    multi_task_t* tsk = new multi_task_t(granularity);
+    while(linenum < graph.size() && i < granularity){
+       linenum++;
+       // cout <<"lol " << graph[linenum] << "\n";
+       tsk->add_task(string(graph[linenum - 1]), linenum);
+       i++;
+    }
+    if(i == 0 ) {
+        delete tsk;
+        return EOS;
+    }
+    ff_send_out(tsk);
+    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &end);
+    executed_secs += elapsed_time_secs(start, end);
+    if(i < granularity){
+       return EOS;
+    }
+    return GO_ON;
+}
+
+/* */
+
 void* ManyLinesWorker::svc(void* t){
     struct timespec start, end;
     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
@@ -73,9 +109,9 @@ void ManyLinesWorker::parse_line(single_task_t task){
        string first = task.line.substr(0, task.line.find("\t"));
        string second = task.line.substr(task.line.find("\t") + 1, task.line.find("\r") - 1 - task.line.find("\t"));
        list<string>::iterator it;
-       for(it = needles->begin(); it != needles->end(); it++){
+       for(it = needles.begin(); it != needles.end(); it++){
             #ifdef DEBUG
-           // cout << "Comparo " << (*it) << " e " << first << " e " << second << "\n";
+             cout << "Comparo " << (*it) << " e " << first << " e " << second << "\n";
             #endif
            if((*it).compare(first) == 0){
                found_node(task.linenum, *it);
@@ -104,18 +140,11 @@ void PrinterWorker::found_node(int linenum, string needle){
     cout << "Trovato " << needle << " alla riga " << linenum << "\n";
 }
 
-/*
-void HasherWorker::found_node(void* t, string needle){
-    this->results->insert(std::make_pair( (int) atoi(needle.c_str()), ((single_task_t*) t)->linenum));
-    // results.emplace(atoi(needle.c_str()), (single_task_t* t)->linenum);
-}
-*/
-
 void * Collector::svc(void * t){
     timespec start, end;
     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
     string* res = (string*) t;
-    //cout << "ricevuto " << res->c_str() << "\n";
+    // cout << "ricevuto " << res->c_str() << "\n";
     // if(! found_nodes.contans(res)){}
     found_nodes.push_back(*res);
     delete res;

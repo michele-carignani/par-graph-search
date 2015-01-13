@@ -19,15 +19,13 @@ using namespace std;
 list<string> needles;
 
 int main(int argc, char* argv[]){
-	int nw, g;
+    int nw, g;
     char* graph_file_path;
     struct timespec start, end;
 
     clock_gettime(CLOCK_REALTIME, &start);
-
-	get_conf(argc, argv, &graph_file_path, &needles, &nw, &g);
-
-	if(nw <= 0 || g <= 0 ) {
+    get_conf(argc, argv, &graph_file_path, &needles, &nw, &g);
+    if(nw <= 0 || g <= 0 ) {
         cout << "Error: n-workers and granularity must be grater than 0, ";
         cout  << nw << " and " << g << "  given.\n";
         exit(1);
@@ -39,7 +37,7 @@ int main(int argc, char* argv[]){
 
     vector<ff_node *> workers;
     for(int j = 0; j < nw; j++){
-        ManyLinesWorker* w = new ManyLinesWorker(&needles);
+        ManyLinesWorker* w = new ManyLinesWorker(needles);
         #ifdef USE_AFFINITY
         w->setAffinity(j * 4);
         #endif     
@@ -58,7 +56,6 @@ int main(int argc, char* argv[]){
     if(pipe.run_and_wait_end()<0) error("running pipe"); 
 
     clock_gettime(CLOCK_REALTIME, &end);
-
     cerr << elapsed_time_secs(start, end);
 
     return 0;

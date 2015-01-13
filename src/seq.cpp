@@ -28,28 +28,28 @@ list<string> needles;
 
 int main(int argc, char* argv[]){
 
-	ifstream graph_file;
-	int linenum;
-	char buf[BUF_LEN];
-	struct timespec start, end;
+    ifstream graph_file;
+    int linenum;
+    char buf[BUF_LEN];
+    struct timespec start, end;
 
-	clock_gettime(CLOCK_REALTIME, &start);
+    clock_gettime(CLOCK_REALTIME, &start);
 
-	load_needles_list(argc, argv, &needles);
+    load_needles_list(argc, argv, &needles);
 
-	graph_file.open(argv[GRAPH_FILENAME_IDX]);
-	graph_file.getline(buf, BUF_LEN);
-	linenum = 1;
-	while(graph_file.gcount() != 0){
-		single_task_t task (buf, linenum);
-		parse_and_check_line(task, needles);
-		linenum++;
-		graph_file.getline(buf, BUF_LEN);
-	}
+    graph_file.open(argv[GRAPH_FILENAME_IDX]);
+    graph_file.getline(buf, BUF_LEN);
+    linenum = 1;
+    while(graph_file.gcount() != 0){
+            single_task_t task (buf, linenum);
+            parse_and_check_line(task, needles);
+            linenum++;
+            graph_file.getline(buf, BUF_LEN);
+    }
 
-	clock_gettime(CLOCK_REALTIME, &end);
+    clock_gettime(CLOCK_REALTIME, &end);
 
-	cerr << elapsed_time_secs(start, end);
-	
-	return 0;
+    cerr << elapsed_time_secs(start, end);
+
+    return 0;
 }

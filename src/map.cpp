@@ -25,7 +25,7 @@ int main(int argc, char** argv){
 
     char* graph_filename;
     char buf[100];
-    int nw, g, i, k, r;
+    int nw, g, i;
 
     get_conf(argc, argv, &graph_filename, &needles, &nw, &g);
 
@@ -67,5 +67,5 @@ int main(int argc, char** argv){
 	   
     cerr << elapsed_time_secs(start, end);
 
-	return 0;
+    return 0;
 }

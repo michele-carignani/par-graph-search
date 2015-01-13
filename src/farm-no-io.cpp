@@ -1,12 +1,12 @@
-/** \file: farm.cpp
-*   \author: Michele Carignani michele.carignani@gmail.com
-*/
-#include <list>
-#include <iostream>
-#include <fstream>
-#include <ff/pipeline.hpp>
+/* 
+ * File:   farm-no-io.cpp
+ * Author: miche
+ *
+ * Created on 12 gennaio 2015, 19.23
+ */
+
+#include <cstdlib>
 #include <ff/farm.hpp>
-#include "graph-search.hpp"
 #include "nodes.hpp"
 #include "utils.hpp"
 
@@ -15,11 +15,13 @@ using namespace ff;
 
 list<string> needles;
 
-int main(int argc, char* argv[]){
-
-    int nw, g;
+int main(int argc, char** argv) {
+    int nw, g, i;
     char* graph_file_path;
     struct timespec start, end;
+    vector<char*> edgelist;
+    ifstream graph_file;
+    char buf[100];
 
     clock_gettime(CLOCK_REALTIME, &start);
 
@@ -30,12 +32,22 @@ int main(int argc, char* argv[]){
         cout  << nw << " and " << g << "  given.\n";
         exit(1);
     }
-
+    
     #ifdef DEBUG
     cout << "Workers num: " << nw << ", Granularity: " << g << " \n";
     #endif
     
-    ManyLinesEmitter em (graph_file_path, g);
+    graph_file.open(graph_file_path);
+    
+    i = 1;
+    graph_file.getline(buf, 100);
+    while(graph_file.gcount() != 0){        
+        edgelist.push_back(strdup(buf));
+        i++;
+        graph_file.getline(buf, 100);
+    }
+    
+    EmitterNoIO em (edgelist, g);
     Collector col;
 
     vector<ff_node *> workers;
@@ -48,14 +60,14 @@ int main(int argc, char* argv[]){
         
         workers.push_back(w);
     }
-
+    
     ff_farm<> graph_search_farm (workers, &em, &col);
 
     if(graph_search_farm.run_and_wait_end()<0) error("running farm");
         
     clock_gettime(CLOCK_REALTIME, &end);
-    
     cerr << elapsed_time_secs(start, end);
     
     return 0;
 }
+

@@ -95,7 +95,7 @@ void parse_and_check_line(single_task_t task, list<string> needles){
 }
 
 void print_found_node(single_task_t* t, string needle){
-    cout << "Trovato " << needle << " alla riga " << ((single_task_t*) t)->linenum << "\n";
+    // cout << "Trovato " << needle << " alla riga " << ((single_task_t*) t)->linenum << "\n";
 }
 
 // usa CLOCK_THREAD_CPUTIME_ID oppure CLOCK_PROCESS_CPUTIME_ID
