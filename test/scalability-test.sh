@@ -4,17 +4,17 @@
 #
 
 BUILD_DIR=./build
+BINS="farm map farm-no-io"
 
 PAR_DEGS="1 2 4 8 16 32 64"
-
-TIME_FORMAT_STRING="%e\t%U\t%S"
+GRANULARITIES="30 150 300 1500 3000 15000 30000"
 
 par_test() {
-	time $BUILD_DIR/$1 $2 $3 $4 $5 1>/dev/null 2>/dev/null
+    $BUILD_DIR/$1 $2 $3 $4 $5 2>&1
 }
 
 test_sequential(){ 
-    time $BUILD_DIR/seq $1 $2 1>/dev/null 2>/dev/null
+    $BUILD_DIR/seq $1 $2 2>&1
 }
 
 usage(){
@@ -26,26 +26,28 @@ if [ $# -lt 2 ] ; then
     exit 0
 fi
 
-echo -e "\n# Test SEQ"
-test_sequential $1 $2
-echo -e "\t"
+echo "# Completion times in seconds of the different parallel and sequential versions"
+echo "# using different computation grains and parallelism degree."
+echo "# First line describes the format of the CSV records (semicolon separated)."
+echo 
+echo "Granularity; Program; 1; 2; 4; 8; 16; 32; 64"
 
-echo -e "\n# Test FARM"
-for i in $PAR_DEGS ; do
-	par_test "farm" $1 $2 $i
-	echo -e "\t"
+seqRes=$( test_sequential $1 $2 )
+seqRecordTail="seq "
+for nw in $PAR_DEGS ; do
+    seqRecordTail="$seqRecordTail; $seqRes"
 done
 
-echo -e "\n# Test PIPE-FARM"
-for i in $PAR_DEGS ; do
-	par_test "pipe-farm" $1 $2 $i
-	echo -e "\t"
-done
-
-echo -e "\n# Test MAP"
-for i in $PAR_DEGS ; do
-	par_test "map" $1 $2 $i
-	echo -e "\t"
+for g in $GRANULARITIES ; do
+    echo "$g; $seqRecordTail"
+    for b in $BINS ; do
+        record="$g; $b"
+        for nw in $PAR_DEGS ; do
+            res=$( par_test $b $1 $2 $nw $g )
+            record="$record; $res"
+        done
+        echo $record
+    done
 done
 
 echo -e "\n-- TESTS COMPLETED -- "
