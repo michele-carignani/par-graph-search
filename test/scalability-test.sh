@@ -7,7 +7,13 @@ BUILD_DIR=./build
 BINS="farm map farm-no-io"
 
 PAR_DEGS="1 2 4 8 16 32 64"
-GRANULARITIES="30 150 300 1500 3000 15000 30000"
+GRANULARITIES="300 3000 30000"
+
+#DATASETS="100 10000 1M 7M"
+#NEEDLES="2 100 250"
+
+DATASETS="100 200"
+NEEDLES="2 50"
 
 par_test() {
     $BUILD_DIR/$1 $2 $3 $4 $5 2>&1
@@ -18,7 +24,7 @@ test_sequential(){
 }
 
 usage(){
-    echo -e "Usage: $0 <graph_file> <nodes_file>\n"
+    echo -e "Usage: $0 <graph_file_basename> <nodes_file_basename>\n"
 }
 
 if [ $# -lt 2 ] ; then
@@ -32,24 +38,42 @@ echo "# First line describes the format of the CSV records (semicolon separated)
 echo 
 echo "# Arguments: $1 $2"
 echo
-echo "Granularity; Program; 1; 2; 4; 8; 16; 32; 64"
 
-seqRes=$( test_sequential $1 $2 )
+for f in $DATASETS ; do
+	if [ ! -f "$1.$f" ] ; then
+		echo -e "Cannot find dataset $1.$f"
+		exit -1
+	fi
+done
+
+for n in $NEEDLES ; do
+	if [ ! -f "$2.$n" ] ; then
+		echo -e "Cannot find needles $2.$n"
+		exit -1
+	fi
+done
+
+echo "Edges; Needles; Granularity; Program; 1; 2; 4; 8; 16; 32; 64"
+
+for d in $DATASETS; do
+for n in $NEEDLES; do
+seqRes=$( test_sequential "$1.$d" "$2.$n" )
 seqRecordTail="seq "
 for nw in $PAR_DEGS ; do
     seqRecordTail="$seqRecordTail; $seqRes"
 done
-
 for g in $GRANULARITIES ; do
-    echo "$g; $seqRecordTail"
+    echo "$d;$n;$g; $seqRecordTail"
     for b in $BINS ; do
-        record="$g; $b"
+        record="$d;$n;$g; $b"
         for nw in $PAR_DEGS ; do
-            res=$( par_test $b $1 $2 $nw $g )
+            res=$( par_test $b "$1.$d" "$2.$n" $nw $g )
             record="$record; $res"
         done
         echo $record
     done
+done
+done
 done
 
 echo -e "\n# TESTS COMPLETED"
