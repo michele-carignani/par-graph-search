@@ -2,7 +2,7 @@
 # Author: Michele Carignani <michele.carignani@gmail.com>
 #
 
-PHONY : all all-mic
+PHONY : all all-mic doxy
 
 CXX = g++
 C_VARS = -g -std=c++11 -O3 -Wall
@@ -20,21 +20,24 @@ seq: utils
 utils nodes:
 	$(CXX) $(C_VARS) src/$@.cpp -c -I$(FF_ROOT) -o src/$@.o
 
-farm pipe-farm map farm-no-io: nodes utils
+farm map farm-no-io: nodes utils
 	$(CXX) $(C_VARS) src/$@.cpp src/nodes.o src/utils.o -I$(FF_ROOT) -o build/$@ -lpthread
 
 seq-mic: utils-mic
-	$(ICC) $(I_VARS) src/$@.cpp src/mic/utils.o -o build/mic/$(subst -mic,,$@)
+	$(ICC) $(I_VARS) src/$(subst -mic,,$@).cpp src/mic/utils.o -o build/mic/$(subst -mic,,$@) -lrt
 
 utils-mic nodes-mic:
-	$(ICC) $(I_VARS) -I$(FF_ROOT) -c src/$@.cpp -o src/mic/$(subst -mic,,$@).o
+	$(ICC) $(I_VARS) -I$(FF_ROOT) -c src/$(subst -mic,,$@).cpp -o src/mic/$(subst -mic,,$@).o
 
 farm-mic pipe-farm-mic map-mic: nodes-mic utils-mic
-	$(IXX) $(I_VARS) -I$(FF_ROOT) src/@.cpp src/mic/utils-mic.o src/mic/nodes-mic.o -o build/mic/$(subst -mic,,$@} -lpthread
+	$(ICC) $(I_VARS) -I$(FF_ROOT) src/$(subst -mic,,$@).cpp src/mic/utils-mic.o src/mic/nodes-mic.o -o build/mic/$(subst -mic,,$@)s -lpthread -lrt
 
-all: seq farm pipe-farm map 
+all: seq farm map farm-no-io
 
-all-mic: seq-mic farm-mic pipe-farm-mic map-mic
+all-mic: seq-mic farm-mic map-mic farm-no-io-mic
+
+doxy:
+	doxygen docs/doxy.conf
 
 # TESTING TARGETS
 
@@ -44,25 +47,18 @@ NEEDLES_FILE = web-BerkStan.txt.needles
 MIC_PREFIX_DIR=par-grap-searh
 
 test-scale:
-    echo -e "\nBuilding executables.."
-    make all
+	@echo -e "\nBuilding executables.."
+	@make all
 
-    echo -e "\nRunning tests"
-    bash tests/scalability-test.sh data/$(DATASET) data/$(NEEDLES_FILE) > TEST_SCALE_RESULTS
+	@echo -e "\nRunning tests"
+	@bash tests/scalability-test.sh data/$(DATASET) data/$(NEEDLES_FILE) > TEST_SCALE_RESULTS &
 
 tests-scale-mic:
-    echo -e "\nBuilding executables.."
-    make all-mic
+	@echo -e "\nBuilding executables.."
+	@make all-mic
 
-    echo -e "\nCopying executables on the mic.."
-    ssh mic0 "mkdir -p $(MIC_PREFIX_DIR)/build"
-    for i in $(ls build/mic) ; do scp build/mic/$i mic0:$(MIC_PREFIX_DIR)/build/$i ; done
+	bash test/prepare-test.sh $(MIC_PREFIX_DIR) $(DATASET) $(NEEDLES_FILE)
 
-    echo -e "\nCopying test files on the mic.."
-    ssh mic0 "mkdir -p $MIC_PREFIX_DIR/test"
-    scp test/scabalability-test.sh mic0:$(MIC_PREFIX_DI)R/test/scalability-test.sh
-    ssh mic0 "mkdir -p $(MIC_PREFIX_DIR)/data"
-    scp data/$(DATASET) mic0:$(MIC_PREFIX_DIR)/data/$(DATASET)
-
-    echo -e "\nRunning test!"
-    ssh mic0 "bash test/scalability-test.sh data/$(DATASET) data/$()"
+	@echo -e "\nRunning test!"
+	@ssh mic0 "cd $(MIC_PREFIX_DIR); bash test/scalability-test.sh data/$(DATASET) data/$(NEEDLES_FILE) > TEST_SCALE_RESULTS &"
+	@echo -e "Test running. Results in the TEST_SCALE_RESULTS file"
