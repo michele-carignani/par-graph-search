@@ -9,30 +9,26 @@
 #include <list>
 #include <time.h>
 
-#define BUFSIZE 10000
-#define TASK_SIZE 1000
-#define LEFT_BUF_SIZE 100
-
 #define DEFAULT_GRANULARITY 20
 #define DEFAULT_WORKERS_NUM 2
 
 /** 
-    \description A single task for parallel graph search.
-    Represents an edge i.e. a line of the graph
-    file in the SNAP library format.
+*    A single task for parallel graph search.
+*    Represents an edge i.e. a line of the graph
+*    file in the SNAP library format.
 */
 typedef struct single_line_task {
     public:
     single_line_task(): line(""), linenum(-1) {};
     single_line_task(std::string l, int ln): line(l), linenum(ln) {};
     ~single_line_task(){};
-    std::string line;
-    int linenum;
+    std::string line; /** The edge represented as a string */
+    int linenum; /** The position in the graph file */
 } single_task_t;
 
 
 /**
-*   \description A task composed of many edges (represented as
+*   A task composed of many edges (represented as
 *   single_task_t structs), used to increase computation grain in
 *   the workers;
 */
@@ -42,7 +38,7 @@ typedef struct multi_lines_task {
     int count = 0;
     
     public:
-    single_task_t* lines;
+    single_task_t* lines; /** The edges assigned to the task */
     
     multi_lines_task(int size){
         lines = new single_task_t[size];
@@ -66,7 +62,7 @@ typedef struct multi_lines_task {
 
 /** 
 *   \deprecated
-*   \description represents a portion of the edgelist
+*   Represents a portion of the edgelist
 *   file, in particular contains len lines.
 */
 typedef struct string_task {
@@ -82,7 +78,7 @@ public:
 
 /**
 *   \deprecated
-*   \description Describes a portion of the edgelist
+*   Describes a portion of the edgelist
 *   as an array of bytes. It is then parsed to find
 *   newlines characters.
 */

@@ -12,12 +12,16 @@
 using namespace std;
 using namespace ff;
 
+/** List of nodes to look for in the graph. */
 list<string> needles;
 
 int main(int argc, char** argv) {
     int nw, g, i;
     char* graph_file_path;
     struct timespec start, end;
+    #ifdef IO_TIME
+    struct timespec end_io;
+    #endif
     vector<char*> edgelist;
     ifstream graph_file;
     char buf[100];
@@ -45,6 +49,10 @@ int main(int argc, char** argv) {
         i++;
         graph_file.getline(buf, 100);
     }
+
+    #ifdef IO_TIME
+    clock_gettime(CLOCK_REALTIME, &end_io);
+    #endif
     
     EmitterNoIO em (edgelist, g);
     Collector col;
@@ -64,9 +72,13 @@ int main(int argc, char** argv) {
 
     if(graph_search_farm.run_and_wait_end()<0) error("running farm");
         
-    clock_gettime(CLOCK_REALTIME, &end);
-    cerr << elapsed_time_secs(start, end);
+    clock_gettime(CLOCK_REALTIME, &end);    
     
+    #ifdef IO_TIME
+    cerr << " : " << elapsed_time_secs(end_io, end);
+    #else 
+    cerr << elapsed_time_secs(start, end);
+    #endif
     return 0;
 }
 

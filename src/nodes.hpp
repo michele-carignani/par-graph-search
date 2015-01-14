@@ -68,9 +68,15 @@ class EmitterNoIO : public ff::ff_node {
         void svc_end();
 };
 
+
+/** 
+ *  Defines a worker that takes a multi_task_t task and 
+ *  loop over the lines contained. Every time a node is 
+ *  found, the found_node() method is called.
+ */
 class ManyLinesWorker : public ff::ff_node {
     private:
-    std::list<std::string> needles;
+    std::list<std::string> needles; /** List of nodes to be looked for */
     float executed_secs = 0;
     
     public:
@@ -83,12 +89,20 @@ class ManyLinesWorker : public ff::ff_node {
 
 };
 
+/** A class for a worker that simply prints to stdout
+ *  when a node is founde: for each node found, a line is
+ *  printed with node ID and line number.
+ */
 class PrinterWorker : public ManyLinesWorker {
     public:
     PrinterWorker(std::list<std::string> ns) : ManyLinesWorker(ns) {};
     void found_node(int linenum, std::string needle);
 };
 
+ /** Describes a simple collector for graph search.
+ *   It receives a string with node ID and line number
+ *   and stores it in a list.
+ */
 class Collector : public ff::ff_node {
     float executed_secs = 0;
     public:

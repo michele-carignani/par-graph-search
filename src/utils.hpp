@@ -25,7 +25,9 @@ bool is_set_par_deg(int argc);
 
 bool is_set_granularity(int argc);
 
-void parse_and_check_line(single_task_t task, std::list<std::string> needles);
+void parse_and_check_line(single_task_t task, std::list<std::string> needles, std::list<std::string>* res);
+
+void list_found_node(std::list<std::string>* res, int linenum, std::string needle);
 
 void print_found_node(single_task_t* t, std::string needle);
 

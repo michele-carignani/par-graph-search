@@ -21,6 +21,7 @@
 using namespace std;
 
 list<string> needles;
+list<string> results;
 
 /**
 		Usage: argv[0] graph_file needles_file
@@ -42,7 +43,7 @@ int main(int argc, char* argv[]){
     linenum = 1;
     while(graph_file.gcount() != 0){
             single_task_t task (buf, linenum);
-            parse_and_check_line(task, needles);
+            parse_and_check_line(task, needles, &results);
             linenum++;
             graph_file.getline(buf, BUF_LEN);
     }

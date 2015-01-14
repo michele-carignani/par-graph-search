@@ -74,28 +74,41 @@ void get_conf(int argc, char** argv, char** gf, list<string>* ns, int* nw, int* 
     *g = get_granularity(argc, argv);
 }
 
-void parse_and_check_line(single_task_t task, list<string> needles){
+void parse_and_check_line(single_task_t task, list<string> needles, list<string>* res){
 
     if(task.line[0] == '#') return;
     
     string first = task.line.substr(0, task.line.find("\t"));
-    string second = task.line.substr(task.line.find("\t") + 1, task.line.find("\r") - 1 - task.line.find("\t"));
+    string second = task.line.substr(
+            task.line.find("\t") + 1, 
+            task.line.find("\r") - 1 - task.line.find("\t")
+     );
     
     list<string>::iterator it;
 
     for(it = needles.begin(); it != needles.end(); it++){
-           // cout << "Comparo " << (*it) << " e " << first << " e " << second << "\n";
            if((*it).compare(first) == 0){
-               print_found_node(&task, *it);
+               list_found_node(res, task.linenum, *it);
            }
            if((*it).compare(second) == 0){
-               print_found_node(&task, *it);
+               list_found_node(res, task.linenum, *it);
            }
        }
 }
 
+void list_found_node(list<string>* res, int linenum, string it){
+     char* line_num = new char[50];
+    
+    sprintf(line_num, "%d :",linenum);
+    string f (line_num);
+    f.append(it);
+
+    res->push_back(f);
+    delete[] line_num;
+}
+
 void print_found_node(single_task_t* t, string needle){
-    // cout << "Trovato " << needle << " alla riga " << ((single_task_t*) t)->linenum << "\n";
+    cout << "Trovato " << needle << " alla riga " << ((single_task_t*) t)->linenum << "\n";
 }
 
 float elapsed_time_secs(struct timespec from, struct timespec to){

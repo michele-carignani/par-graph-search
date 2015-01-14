@@ -47,11 +47,12 @@ int main(int argc, char* argv[]){
     }
     
     ManyLinesEmitter emitter (graph_file_path, g);
+    
     ff_farm<> wfarm (workers);
     wfarm.remove_collector();
     Collector collector;
     
-    ff_pipe<int> pipe(&emitter, &wfarm, &collector);
+    ff_pipe<string> pipe(&emitter, &wfarm, &collector);
     
     pipe.cleanup_nodes();
     if(pipe.run_and_wait_end()<0) error("running pipe"); 

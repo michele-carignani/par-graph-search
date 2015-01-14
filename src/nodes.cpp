@@ -150,7 +150,7 @@ void ManyLinesWorker::found_node(int linenum, std::string needle){
 }
 
 void PrinterWorker::found_node(int linenum, string needle){
-    cout << "Trovato " << needle << " alla riga " << linenum << "\n";
+    cout << needle << " : " << linenum << "\n";
 }
 
 void * Collector::svc(void * t){
@@ -171,10 +171,8 @@ void Collector::print_res(){
 }
 
 void Collector::svc_end(){
-    print_res();
+    // print_res();
 #ifdef PRINT_EXEC_TIME
     cerr << "Collector executed " << executed_secs << " secs\n";
 #endif
 }
-
-#endif

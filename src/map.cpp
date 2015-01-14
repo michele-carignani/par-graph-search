@@ -16,13 +16,16 @@ using namespace std;
 using namespace ff;
 
 list<string> needles;
+list<string> results;
 
 int main(int argc, char** argv){
     
     vector<single_task_t> edgelist;
     ifstream graph_file;
-    struct timespec start, all_read, end;
-
+    struct timespec start, end;
+    #ifdef IO_TIME
+    struct timespec end_io;
+    #endif
     char* graph_filename;
     char buf[100];
     int nw, g, i;
@@ -40,32 +43,36 @@ int main(int argc, char** argv){
         i++;
         graph_file.getline(buf, 100);        
     }
-
-    clock_gettime(CLOCK_REALTIME, &all_read);
+    
+    #ifdef IO_TIME
+    clock_gettime(CLOCK_REALTIME, &end_io);
+    #endif
 
     ParallelFor pf;
     if(is_set_par_deg(argc)){
         if(is_set_granularity(argc)){
             // dynamic scheduling with stride g and par deg nw
             pf.parallel_for(0,i-1, nw, g, [&edgelist](const int i){
-                parse_and_check_line(edgelist[i], needles);
+                parse_and_check_line(edgelist[i], needles, &results);
             });
         } else {
             // static scheduling with auto strides
             pf.parallel_for(0,i-1, nw, [&edgelist](const int i){
-                parse_and_check_line(edgelist[i], needles);
+                parse_and_check_line(edgelist[i], needles, &results);
             });
         }
     } else {
         // dynamic scheduling with auto par deg and auto strides
         pf.parallel_for(0,i-1, [&edgelist](const int i){
-            parse_and_check_line(edgelist[i], needles);
+            parse_and_check_line(edgelist[i], needles, &results);
         });
     }
     
     clock_gettime(CLOCK_REALTIME, &end);
 	   
     cerr << elapsed_time_secs(start, end);
-
+    #ifdef IO_TIME
+    cerr << " : " << elapsed_time_secs(end_io, end);
+    #endif
     return 0;
 }
