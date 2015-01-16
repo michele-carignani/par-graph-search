@@ -5,6 +5,7 @@
  * Created on 16 gennaio 2015, 15.57
  */
 #include <time.h>
+#include <iostream>
 #include "utils.hpp"
 
 using namespace std;
@@ -31,7 +32,7 @@ int main(int argc, char** argv) {
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start_cpu);
     
     for(int i = 0; i < ITER; i++){
-        parse_and_check_line(task, needles, *results);
+        parse_and_check_line(task, needles, &results);
     }
     
     clock_gettime(CLOCK_REALTIME, &end_r);
@@ -39,6 +40,21 @@ int main(int argc, char** argv) {
     
     cout << "Tc of f (REAL) : " << elapsed_time_secs(start_r,end_r) / ITER << "\n";
     cout << "Tc of f (CPU) : " << elapsed_time_secs(start_cpu,end_cpu) / ITER << "\n";
+    
+    needles.push_back("5430");
+    
+    clock_gettime(CLOCK_REALTIME, &start_r);
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start_cpu);
+    
+    for(int i = 0; i < ITER; i++){
+        parse_and_check_line(task, needles, &results);
+    }
+    
+    clock_gettime(CLOCK_REALTIME, &end_r);
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end_cpu);
+    
+    cout << "Tc of f (REAL) (2 needles) : " << elapsed_time_secs(start_r,end_r) / ITER << "\n";
+    cout << "Tc of f (CPU)  (2 needles) : " << elapsed_time_secs(start_cpu,end_cpu) / ITER << "\n";
     
     return 0;
 }
