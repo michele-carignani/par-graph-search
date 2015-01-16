@@ -25,7 +25,11 @@ class ManyLinesEmitter : public ff::ff_node {
     int linenum = 0; /** Keeps track of number of lines read */
     int granularity = 20; /** Size of the tasks emitted */
     std::ifstream graph_file; /** Data file containing graph as an edge list */
-    float executed_secs = 0; /** Keeps track of execution cpu time  fo the node */
+
+	#ifdef PRINT_EXEC_TIME
+    float* executed_secs; /** Keeps track of execution cpu time  fo the node */
+	int* svc_executions;
+	#endif
 
    public:
    void * svc(void  * t);
@@ -52,7 +56,10 @@ class EmitterNoIO : public ff::ff_node {
         unsigned int linenum;
         int granularity;
         std::vector<char*> graph;
-        float executed_secs = 0;
+		#ifdef PRINT_EXEC_TIME
+        float* executed_secs;
+		int* svc_executions;
+		#endif
         
     public:
         /**
@@ -77,7 +84,10 @@ class EmitterNoIO : public ff::ff_node {
 class ManyLinesWorker : public ff::ff_node {
     private:
     std::list<std::string> needles; /** List of nodes to be looked for */
-    float executed_secs = 0;
+#ifdef PRINT_EXEC_TIME
+    float* executed_secs;
+	int* svc_executions;
+#endif
     
     public:
     ManyLinesWorker (std::list<std::string> ns) : needles(ns) {};
@@ -104,7 +114,10 @@ class PrinterWorker : public ManyLinesWorker {
  *   and stores it in a list.
  */
 class Collector : public ff::ff_node {
-    float executed_secs = 0;
+	#ifdef PRINT_EXEC_TIME
+    float* executed_secs;
+	int* svc_executions;
+	#endif
     public:
     std::list<std::string> found_nodes;
 

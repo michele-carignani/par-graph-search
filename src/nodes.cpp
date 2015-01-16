@@ -25,8 +25,10 @@ void ManyLinesEmitter::svc_end(){
 }
 
 void* ManyLinesEmitter::svc(void * t){
+#ifdef PRINT_EXEC_TIME
     struct timespec start, end;
     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
+#endif
     if(!graph_file){
             return EOS;
     }
@@ -46,10 +48,10 @@ void* ManyLinesEmitter::svc(void * t){
     
     ff_send_out(tsk);
     delete[] s;
-    
+#ifedef PRINT_EXEC_TIME
     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &end);
-    executed_secs += elapsed_time_secs(start, end);
-    
+    *executed_secs += elapsed_time_secs(start, end);
+#endif
     if(i < granularity){
         return EOS;
     }
@@ -65,10 +67,12 @@ void EmitterNoIO::svc_end(){
 }
 
 void* EmitterNoIO::svc(void* t){
+#ifdef PRINT_EXEC_TIME
     struct timespec start, end;
-    int i = 0;
-    
     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
+#endif
+    
+    int i = 0;
     
     multi_task_t* tsk = new multi_task_t(granularity);
     while(linenum < graph.size() && i < granularity){
@@ -83,8 +87,10 @@ void* EmitterNoIO::svc(void* t){
     }
     
     ff_send_out(tsk);
+    #ifdef PRINT_EXEC_TIME
     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &end);
-    executed_secs += elapsed_time_secs(start, end);
+    *executed_secs += elapsed_time_secs(start, end);
+    #endif
     
     if(i < granularity){
        return EOS;
@@ -95,9 +101,11 @@ void* EmitterNoIO::svc(void* t){
 
 /* MANYLINESWORKER */
 void* ManyLinesWorker::svc(void* t){
+    #ifdef PRINT_EXEC_TIME
     struct timespec start, end;
     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
-    
+    #endif
+
     multi_task_t* task = (multi_task_t*) t;
     for(int i = 0; i < task->get_count(); i++){
         parse_line(task->lines[i]);
@@ -105,9 +113,11 @@ void* ManyLinesWorker::svc(void* t){
     
     delete task;
     
+    #ifdef PRINT_EXEC_TIME
     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &end);
-    executed_secs += elapsed_time_secs(start, end);
-    
+    *executed_secs += elapsed_time_secs(start, end);
+    #endif
+
     return (void*) GO_ON;
 }
 
@@ -154,13 +164,21 @@ void PrinterWorker::found_node(int linenum, string needle){
 }
 
 void * Collector::svc(void * t){
+
+    #ifdef PRINT_EXEC_TIME
     timespec start, end;
     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
+    #endif
+
     string* res = (string*) t;
     found_nodes.push_back(*res);
     delete res;
+    
+    #ifdef PRINT_EXEC_TIME
     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &end);
     executed_secs += elapsed_time_secs(start, end);
+    #endif
+
     return GO_ON;
 }
 
