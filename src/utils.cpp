@@ -123,3 +123,25 @@ float elapsed_time_secs(struct timespec from, struct timespec to){
     float r = (float) secs + (float) nsecs / ((1000.0) * (1000.0) * (1000.0));
     return r;
 }
+
+float elapsed_time_nsecs(struct timespec from, struct timespec to){
+    long secs, nsecs;
+    if((to.tv_nsec - from.tv_nsec) < 0){
+        secs = to.tv_sec - from.tv_sec - 1;
+        nsecs = 1000000000 + to.tv_nsec - from.tv_nsec;
+    } else {
+        secs = to.tv_sec - from.tv_sec;
+        nsecs = to.tv_nsec - from.tv_nsec;
+    }
+    float r = (float) secs + (float) nsecs;
+    return r;
+}
+/*
+float profile_func(std::function<void()> func, clockid_t clock = CLOCK_REALTIME) {
+    struct timespec start, end;
+    clock_gettime(clock, &start);
+    func();
+    clock_gettime(clock, &end);
+    return elapsed_time_secs(start,end);
+}
+ * */

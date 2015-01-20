@@ -7,6 +7,7 @@
 
 #include <list>
 #include <string>
+#include <functional>
 #include "graph-search.hpp"
 
 void usage(int argc, char** argv);
@@ -32,5 +33,9 @@ void list_found_node(std::list<std::string>* res, int linenum, std::string needl
 void print_found_node(single_task_t* t, std::string needle);
 
 float elapsed_time_secs(struct timespec from, struct timespec to);
+float elapsed_time_nsecs(struct timespec from, struct timespec to);
+
+// float profile_func(lambda() func, clockid_t clock);
+
 
 #endif // UTILS_HPP
