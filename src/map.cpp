@@ -48,22 +48,22 @@ int main(int argc, char** argv){
     clock_gettime(CLOCK_REALTIME, &end_io);
     #endif
 
-    ParallelFor pf;
     if(is_set_par_deg(argc)){
         if(is_set_granularity(argc)){
+            ParallelFor pf(nw);
             // dynamic scheduling with stride g and par deg nw
-            pf.parallel_for(0,i-1, nw, g, [&edgelist](const int i){
+            pf.parallel_for(0,i-1, 1, g [&edgelist](const int i){
                 parse_and_check_line(edgelist[i], needles, &results);
             });
         } else {
             // static scheduling with auto strides
-            pf.parallel_for(0,i-1, nw, [&edgelist](const int i){
+            pf.parallel_for(0,i-1, 1 [&edgelist](const int i){
                 parse_and_check_line(edgelist[i], needles, &results);
             });
         }
     } else {
         // dynamic scheduling with auto par deg and auto strides
-        pf.parallel_for(0,i-1, [&edgelist](const int i){
+        pf.parallel_for(0,i-1,  [&edgelist](const int i){
             parse_and_check_line(edgelist[i], needles, &results);
         });
     }

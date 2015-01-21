@@ -31,11 +31,11 @@ int main(int argc, char** argv) {
     
     cout << "# nworkers, process cpu time\n";
     for(int j = 1; j < 129; j++){
+        ParallelFor pf(j);
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
-        ParallelFor pf;
-        pf.parallel_for(0, DATA_SIZE, j, [&data](const int i){
+        pf.parallel_for(0, DATA_SIZE, [&data](const int i){
             data[i] = pow(data[i], 7);
-        });    
+        }, j);    
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
         cout << j << ", " << elapsed_time_secs(start, end) << "\n";
     }

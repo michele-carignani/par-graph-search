@@ -92,8 +92,8 @@ void* EmitterNoIO::svc(void* t){
        linenum++;       
        tsk->add_task(string(graph[linenum - 1]), linenum);
        i++;
-    
     }
+    
     if(i == 0 ) {
         delete tsk;
         return EOS;
