@@ -48,17 +48,32 @@ int main(int argc, char** argv) {
         graph_file.getline(buf, 100);
     }
 
-    clock_gettime(CLOCK_REALTIME, &start);
     #ifdef IO_TIME
     clock_gettime(CLOCK_REALTIME, &end_io);
     #endif
+
+#ifdef PRINT_EXEC_TIME
+    float emitter_time = 0, collector_time = 0;
+    float* workers_times = new float[nw];
+    int emitter_execs = 0, collector_execs = 0;
+    int* workers_execs = new int[nw];
+#endif
     
+#ifndef PRINT_EXEC_TIME
     EmitterNoIO em (edgelist, g);
     Collector col;
-
+#else
+    EmitterNoIO em (edgelist, g, &emitter_time, &emitter_execs);
+    Collector col(&collector_time, &collector_execs);
+#endif
     vector<ff_node *> workers;
     for(int j = 0; j < nw; j++){
+#ifndef PRINT_EXEC_TIME
         ManyLinesWorker* w = new ManyLinesWorker (needles) ;
+#else 
+        workers_execs[j] = 0; workers_times[j] = 0;
+        ManyLinesWorker* w = new ManyLinesWorker (needles, &(workers_times[j]), &(workers_execs[j])) ;
+#endif
         
         #ifdef USE_AFFINITY
         w->setAffinity(j * 4);
@@ -69,8 +84,8 @@ int main(int argc, char** argv) {
     
     ff_farm<> graph_search_farm (workers, &em, &col);
 
-    if(graph_search_farm.run_and_wait_end()<0) error("running farm");
-        
+    clock_gettime(CLOCK_REALTIME, &start);
+    if(graph_search_farm.run_and_wait_end()<0) error("running farm");    
     clock_gettime(CLOCK_REALTIME, &end);    
     
     #ifdef IO_TIME
@@ -78,6 +93,19 @@ int main(int argc, char** argv) {
     #else 
     cerr << elapsed_time_secs(start, end);
     #endif
+
+#ifdef PRINT_EXEC_TIME
+    cerr << elapsed_time_secs(start, end);
+    cerr << "\nEmitter: " << emitter_execs << " times,\t" << emitter_time << " secs,\t"<< (emitter_time / emitter_execs) <<" avg\n";
+    cerr << "Collector: " << collector_execs << " times,\t" << collector_time << " secs,\t"<< (collector_time / collector_execs) <<" avg\n";
+    float avg_wt=0, avg_we=0;
+    for(int j = 0; j < nw; j++){
+        avg_wt += workers_times[j];
+        avg_we += workers_execs[j];
+    }
+    cerr << "Workers avg: " << (avg_we / nw) << " times,\t" <<  (avg_wt / nw) << " secs,\t"<< (avg_wt / avg_we) <<" avg\n";;
+    
+#endif
     return 0;
 }
 
