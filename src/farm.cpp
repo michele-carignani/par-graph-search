@@ -34,13 +34,31 @@ int main(int argc, char* argv[]){
     #ifdef DEBUG
     cout << "Workers num: " << nw << ", Granularity: " << g << " \n";
     #endif
+
+#ifdef PRINT_EXEC_TIME
+    float emitter_time = 0, collector_time = 0;
+    float* workers_times = new float[nw];
+    int emitter_execs = 0, collector_execs = 0;
+    int* workers_execs = new int[nw];
+#endif
     
+    
+#ifndef PRINT_EXEC_TIME
     ManyLinesEmitter em (graph_file_path, g);
     Collector col;
-
+#else
+    ManyLinesEmitter em (graph_file_path, g, &emitter_time, &emitter_execs);
+    Collector col(&collector_time, &collector_execs);
+#endif
+    
     vector<ff_node *> workers;
     for(int j = 0; j < nw; j++){
+#ifndef PRINT_EXEC_TIME
         ManyLinesWorker* w = new ManyLinesWorker (needles) ;
+#else 
+        workers_execs[j] = 0; workers_times[j] = 0;
+        ManyLinesWorker* w = new ManyLinesWorker (needles, &(workers_times[j]), &(workers_execs[j])) ;
+#endif
         
         #ifdef USE_AFFINITY
         w->setAffinity(j * 4);
@@ -56,6 +74,11 @@ int main(int argc, char* argv[]){
     clock_gettime(CLOCK_REALTIME, &end);
     
     cerr << elapsed_time_secs(start, end);
+    cerr << "\nEmitter: " << emitter_execs << " times,\t" << emitter_time << " secs,\t"<< (emitter_time / emitter_execs) <<" avg\n";
+    cerr << "Collector: " << collector_execs << " times,\t" << collector_time << " secs,\t"<< (collector_time / collector_execs) <<" avg\n";
+    for(int j = 0; j < nw; j++){
+        cerr << "Worker " << j << ": " << workers_execs[j] << " times,\t" <<  workers_times[j] << " secs,\t"<< (workers_times[j] / workers_execs[j]) <<" avg\n";;
+    }
     
     return 0;
 }

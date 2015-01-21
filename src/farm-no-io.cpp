@@ -26,8 +26,6 @@ int main(int argc, char** argv) {
     ifstream graph_file;
     char buf[100];
 
-    clock_gettime(CLOCK_REALTIME, &start);
-
     get_conf(argc, argv, &graph_file_path, &needles, &nw, &g);
 
     if(nw <= 0 || g <= 0 ) {
@@ -50,6 +48,7 @@ int main(int argc, char** argv) {
         graph_file.getline(buf, 100);
     }
 
+    clock_gettime(CLOCK_REALTIME, &start);
     #ifdef IO_TIME
     clock_gettime(CLOCK_REALTIME, &end_io);
     #endif

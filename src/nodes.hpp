@@ -40,7 +40,9 @@ class ManyLinesEmitter : public ff::ff_node {
     * @param g Size of the task to be emitted. Default is 20
     */
    ManyLinesEmitter(char* pathname, int g);
-   
+   #ifdef PRINT_EXEC_TIME
+	ManyLinesEmitter(char* pathname, int g, float* ex_secs, int* execs);
+	#endif
    ~ManyLinesEmitter() {};
    void svc_end();
 
@@ -69,6 +71,12 @@ class EmitterNoIO : public ff::ff_node {
          */
         EmitterNoIO(std::vector<char*> graph, int g = 20):
             linenum(0), granularity(g), graph(graph){};
+		
+		#ifdef PRINT_EXEC_TIME
+		EmitterNoIO(std::vector<char*> graph, int g, float* ex_secs, int* execs) : 
+			linenum(0), granularity(g), graph(graph),
+			executed_secs(ex_secs), svc_executions(execs) {};
+		#endif
             
         ~EmitterNoIO() {};
         void* svc(void * t);
@@ -91,6 +99,10 @@ class ManyLinesWorker : public ff::ff_node {
     
     public:
     ManyLinesWorker (std::list<std::string> ns) : needles(ns) {};
+	#ifdef PRINT_EXEC_TIME
+	ManyLinesWorker(std::list<std::string> ns, float* ex_secs, int* execs) : 
+		needles(ns), executed_secs(ex_secs), svc_executions(execs) {};
+	#endif
     ~ManyLinesWorker () {};
     void * svc(void* t);
     void parse_line(single_task_t task);
@@ -120,6 +132,11 @@ class Collector : public ff::ff_node {
 	#endif
     public:
     std::list<std::string> found_nodes;
+	#ifdef PRINT_EXEC_TIME
+	Collector(float* ex_secs, int* execs) : 
+		executed_secs(ex_secs), svc_executions(execs) {};
+	#endif
+	
 
     void * svc(void * t);
     void svc_end();

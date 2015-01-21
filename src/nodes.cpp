@@ -18,16 +18,28 @@ ManyLinesEmitter::ManyLinesEmitter(char* pathname, int g){
     granularity = g;
 }
 
+#ifdef PRINT_EXEC_TIME
+ManyLinesEmitter::ManyLinesEmitter(char* pathname, int g, float* ex_secs, int* execs)
+    : linenum(0), granularity(g), executed_secs(ex_secs), svc_executions(execs)
+    {
+    graph_file.open(pathname);
+    if(!graph_file){
+        error("Opening graph file");
+    }
+}
+#endif
+
 void ManyLinesEmitter::svc_end(){
 #ifdef PRINT_EXEC_TIME
-    cerr << "Emitter executed " << executed_secs << " secs\n";
+    // cerr << "Emitter executed " << *executed_secs << " secs\n";
 #endif
 }
 
 void* ManyLinesEmitter::svc(void * t){
 #ifdef PRINT_EXEC_TIME
     struct timespec start, end;
-    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
+    clock_gettime(CLOCK_REALTIME, &start);
+    *svc_executions = *svc_executions + 1;
 #endif
     if(!graph_file){
             return EOS;
@@ -48,8 +60,8 @@ void* ManyLinesEmitter::svc(void * t){
     
     ff_send_out(tsk);
     delete[] s;
-#ifedef PRINT_EXEC_TIME
-    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &end);
+#ifdef PRINT_EXEC_TIME
+    clock_gettime(CLOCK_REALTIME, &end);
     *executed_secs += elapsed_time_secs(start, end);
 #endif
     if(i < granularity){
@@ -62,14 +74,14 @@ void* ManyLinesEmitter::svc(void * t){
 /*     EMITTERNOIO     */
 void EmitterNoIO::svc_end(){
 #ifdef PRINT_EXEC_TIME
-    cerr << "Emitter executed " << executed_secs << " secs\n";
+   //  cerr << "Emitter executed " << *executed_secs << " secs\n";
 #endif
 }
 
 void* EmitterNoIO::svc(void* t){
 #ifdef PRINT_EXEC_TIME
     struct timespec start, end;
-    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
+    clock_gettime(CLOCK_REALTIME, &start);
 #endif
     
     int i = 0;
@@ -88,8 +100,9 @@ void* EmitterNoIO::svc(void* t){
     
     ff_send_out(tsk);
     #ifdef PRINT_EXEC_TIME
-    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &end);
+    clock_gettime(CLOCK_REALTIME, &end);
     *executed_secs += elapsed_time_secs(start, end);
+    *svc_executions++;
     #endif
     
     if(i < granularity){
@@ -103,7 +116,8 @@ void* EmitterNoIO::svc(void* t){
 void* ManyLinesWorker::svc(void* t){
     #ifdef PRINT_EXEC_TIME
     struct timespec start, end;
-    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
+    clock_gettime(CLOCK_REALTIME, &start);
+    *svc_executions = *svc_executions + 1;
     #endif
 
     multi_task_t* task = (multi_task_t*) t;
@@ -114,7 +128,7 @@ void* ManyLinesWorker::svc(void* t){
     delete task;
     
     #ifdef PRINT_EXEC_TIME
-    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &end);
+    clock_gettime(CLOCK_REALTIME, &end);
     *executed_secs += elapsed_time_secs(start, end);
     #endif
 
@@ -123,7 +137,7 @@ void* ManyLinesWorker::svc(void* t){
 
 void ManyLinesWorker::svc_end(){
 #ifdef PRINT_EXEC_TIME
-    cerr << "Worker " << get_my_id() << " executed " << executed_secs << " secs\n";
+    // cerr << "Worker " << get_my_id() << " executed " << *executed_secs << " secs\n";
 #endif
 }
 
@@ -167,7 +181,8 @@ void * Collector::svc(void * t){
 
     #ifdef PRINT_EXEC_TIME
     timespec start, end;
-    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start);
+    clock_gettime(CLOCK_REALTIME, &start);
+    *svc_executions = *svc_executions + 1;
     #endif
 
     string* res = (string*) t;
@@ -175,8 +190,8 @@ void * Collector::svc(void * t){
     delete res;
     
     #ifdef PRINT_EXEC_TIME
-    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &end);
-    executed_secs += elapsed_time_secs(start, end);
+    clock_gettime(CLOCK_REALTIME, &end);
+    *executed_secs += elapsed_time_secs(start, end);
     #endif
 
     return GO_ON;
@@ -189,8 +204,8 @@ void Collector::print_res(){
 }
 
 void Collector::svc_end(){
-    // print_res();
+    print_res();
 #ifdef PRINT_EXEC_TIME
-    cerr << "Collector executed " << executed_secs << " secs\n";
+    // cerr << "Collector executed " << *executed_secs << " secs\n";
 #endif
 }
