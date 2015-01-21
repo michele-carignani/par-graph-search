@@ -82,6 +82,7 @@ void* EmitterNoIO::svc(void* t){
 #ifdef PRINT_EXEC_TIME
     struct timespec start, end;
     clock_gettime(CLOCK_REALTIME, &start);
+    *svc_executions = *svc_executions + 1;
 #endif
     
     int i = 0;
@@ -102,7 +103,6 @@ void* EmitterNoIO::svc(void* t){
     #ifdef PRINT_EXEC_TIME
     clock_gettime(CLOCK_REALTIME, &end);
     *executed_secs += elapsed_time_secs(start, end);
-    *svc_executions++;
     #endif
     
     if(i < granularity){
