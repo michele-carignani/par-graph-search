@@ -4,15 +4,7 @@
 
 PHONY : all all-mic doxy
 
-CXX = g++
-C_VARS = -g -std=c++11 -O3 -Wall -DPRINT_EXEC_TIME
-
-ICC = icc
-I_VARS = -mmic -g -std=c++11 -O3 -Wall -DNO_DEFAULT_MAPPING
-
-# Set FastFlow root
-FF_ROOT = ../../mc-fastflow-code
-PROFILING_FLAGS = -profile-functions -profile-loops
+include Makefile.conf
 
 # BUILD TARGETS
 
