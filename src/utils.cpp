@@ -74,26 +74,31 @@ void get_conf(int argc, char** argv, char** gf, list<string>* ns, int* nw, int* 
     *g = get_granularity(argc, argv);
 }
 
-void parse_and_check_line(single_task_t task, list<string> needles, list<string>* res){
+pair<node_t,node_t> parse_and_check_line(string* line, list<node_t>* needles){
 
-    if(task.line[0] == '#') return;
+    pair<node_t,node_t> result;
+    result.first = NULL_NODE;
+    result.second = NULL_NODE;
     
-    string first = task.line.substr(0, task.line.find("\t"));
-    string second = task.line.substr(
-            task.line.find("\t") + 1, 
-            task.line.find("\r") - 1 - task.line.find("\t")
+    if((*line)[0] == '#') return result;
+    
+    string first = line->substr(0, line->find("\t"));
+    string second = line->substr(
+            line->find("\t") + 1, 
+            line->find("\r") - 1 - line->find("\t")
      );
     
     list<string>::iterator it;
-
-    for(it = needles.begin(); it != needles.end(); it++){
-           if((*it).compare(first) == 0){
-               list_found_node(res, task.linenum, *it);
-           }
-           if((*it).compare(second) == 0){
-               list_found_node(res, task.linenum, *it);
-           }
-       }
+    
+    for(it = needles->begin(); it != needles->end(); it++){
+        if((*it).compare(first) == 0){
+            result.first = (node_t) *it;
+        }
+        if((*it).compare(second) == 0){
+            result.second = (node_t) *it;
+        }
+    }
+    return result;
 }
 
 void list_found_node(list<string>* res, int linenum, string it){
@@ -112,7 +117,7 @@ void print_found_node(single_task_t* t, string needle){
 }
 
 float elapsed_time_secs(struct timespec from, struct timespec to){
-    long secs, nsecs;
+    float secs, nsecs;
     if((to.tv_nsec - from.tv_nsec) < 0){
         secs = to.tv_sec - from.tv_sec - 1;
         nsecs = 1000000000 + to.tv_nsec - from.tv_nsec;
@@ -120,7 +125,7 @@ float elapsed_time_secs(struct timespec from, struct timespec to){
         secs = to.tv_sec - from.tv_sec;
         nsecs = to.tv_nsec - from.tv_nsec;
     }
-    float r = (float) secs + (float) nsecs / ((1000.0) * (1000.0) * (1000.0));
+    float r = secs + nsecs / ((1000.0) * (1000.0) * (1000.0));
     return r;
 }
 

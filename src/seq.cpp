@@ -42,10 +42,17 @@ int main(int argc, char* argv[]){
     graph_file.getline(buf, BUF_LEN);
     linenum = 1;
     while(graph_file.gcount() != 0){
-            single_task_t task (buf, linenum);
-            parse_and_check_line(task, needles, &results);
-            linenum++;
-            graph_file.getline(buf, BUF_LEN);
+        string line (buf);
+        pair<node_t,node_t> found = parse_and_check_line(&line, &needles);
+        
+        if(found.first != NULL_NODE){
+            list_found_node(&results , linenum, found.first);
+        }
+        if(found.second != NULL_NODE){
+            list_found_node(&results, linenum, found.first);
+        }
+        linenum++;
+        graph_file.getline(buf, BUF_LEN);
     }
 
     clock_gettime(CLOCK_REALTIME, &end);

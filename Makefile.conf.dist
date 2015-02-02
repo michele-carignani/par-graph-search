@@ -1,0 +1,13 @@
+#
+# Author: Michele Carignani <michele.carignani@gmail.com>
+#
+
+CXX = 
+C_VARS = -g -std=c++11 -O3 -Wall
+
+ICC = 
+I_VARS = -mmic -g -std=c++11 -O3 -Wall -DNO_DEFAULT_MAPPING
+
+# Set FastFlow root
+FF_ROOT = 
+PROFILING_FLAGS = -profile-functions -profile-loops

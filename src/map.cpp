@@ -8,6 +8,7 @@
 #include <list>
 #include <vector>
 #include <time.h>
+#include <utility>
 
 #include "graph-search.hpp"
 #include "utils.hpp"
@@ -49,27 +50,52 @@ int main(int argc, char** argv){
     #endif
 
     if(is_set_par_deg(argc)){
+        ParallelFor pf(nw);
         if(is_set_granularity(argc)){
-            ParallelFor pf(nw);
             // dynamic scheduling with stride g and par deg nw
-            pf.parallel_for(0,i-1, 1, g [&edgelist](const int i){
-                parse_and_check_line(edgelist[i], needles, &results);
+            pf.parallel_for(0,i-1, 1, g, [&edgelist](const int i){
+                string l (edgelist[i].line);
+                pair<node_t, node_t> res = parse_and_check_line(&l, &needles);
+                if(res.first != NULL_NODE){
+                    list_found_node(&results, i, res.first);
+                }
+                if(res.second != NULL_NODE){
+                    list_found_node(&results, i, res.second);
+                }
+                
             });
         } else {
             // static scheduling with auto strides
-            pf.parallel_for(0,i-1, 1 [&edgelist](const int i){
-                parse_and_check_line(edgelist[i], needles, &results);
+            pf.parallel_for(0,i-1, 1, [&edgelist](const int i){
+                string l (edgelist[i].line);
+                pair<node_t, node_t> res = parse_and_check_line(&l, &needles);
+                if(res.first != NULL_NODE){
+                    list_found_node(&results, i, res.first);
+                }
+                if(res.second != NULL_NODE){
+                    list_found_node(&results, i, res.second);
+                }
             });
         }
     } else {
+        ParallelFor pf;
         // dynamic scheduling with auto par deg and auto strides
         pf.parallel_for(0,i-1,  [&edgelist](const int i){
-            parse_and_check_line(edgelist[i], needles, &results);
+            string l (edgelist[i].line);
+            pair<node_t, node_t> res = parse_and_check_line(&l, &needles);
+            if(res.first != NULL_NODE){
+                list_found_node(&results, i, res.first);
+            }
+            if(res.second != NULL_NODE){
+                list_found_node(&results, i, res.second);
+            }
         });
     }
     
     clock_gettime(CLOCK_REALTIME, &end);
-	   
+    for(auto x: results){
+        cout << x << "\n";
+    }
     cerr << elapsed_time_secs(start, end);
     #ifdef IO_TIME
     cerr << " : " << elapsed_time_secs(end_io, end);

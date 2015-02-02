@@ -23,7 +23,7 @@ using namespace ff;
 int main(int argc, char** argv) {
     struct timespec start, end;
     
-    double data[DATA_SIZE];
+    double* data = new double[DATA_SIZE];
     
     for(int j = 0; j < DATA_SIZE; j++){
         data[j] = rand() % 1000;
@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
         pf.parallel_for(0, DATA_SIZE, [&data](const int i){
             data[i] = pow(data[i], 7);
-        }, j);    
+        });    
         clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
         cout << j << ", " << elapsed_time_secs(start, end) << "\n";
     }

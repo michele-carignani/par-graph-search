@@ -1,5 +1,5 @@
-/** \file: nodes.hpp
-*    \author: Michele Carignani michele.carignani@gmail.com
+/** \file nodes.hpp
+*   \author Michele Carignani michele.carignani@gmail.com
 */
 
 #include <ff/pipeline.hpp>
@@ -10,6 +10,7 @@
 #include <list>
 #include <unordered_map>
 #include "graph-search.hpp"
+#include "utils.hpp"
 
 #ifndef _NODES_HPP
 #define _NODES_HPP
@@ -44,7 +45,6 @@ class ManyLinesEmitter : public ff::ff_node {
 	ManyLinesEmitter(char* pathname, int g, float* ex_secs, int* execs);
 	#endif
    ~ManyLinesEmitter() {};
-   void svc_end();
 
 };
 
@@ -105,8 +105,6 @@ class ManyLinesWorker : public ff::ff_node {
 	#endif
     ~ManyLinesWorker () {};
     void * svc(void* t);
-    void parse_line(single_task_t task);
-    virtual void found_node(int linenum, std::string needle);
     void svc_end();
 
 };

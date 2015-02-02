@@ -9,7 +9,10 @@
 using namespace std;
 using namespace ff;
 
+
 /*        MANY LINES EMITTER      */
+
+/* Constructor  */
 ManyLinesEmitter::ManyLinesEmitter(char* pathname, int g){
     graph_file.open(pathname);
     if(!graph_file){
@@ -18,6 +21,7 @@ ManyLinesEmitter::ManyLinesEmitter(char* pathname, int g){
     granularity = g;
 }
 
+/* Constructor with time tracking */
 #ifdef PRINT_EXEC_TIME
 ManyLinesEmitter::ManyLinesEmitter(char* pathname, int g, float* ex_secs, int* execs)
     : linenum(0), granularity(g), executed_secs(ex_secs), svc_executions(execs)
@@ -29,28 +33,26 @@ ManyLinesEmitter::ManyLinesEmitter(char* pathname, int g, float* ex_secs, int* e
 }
 #endif
 
-void ManyLinesEmitter::svc_end(){
-#ifdef PRINT_EXEC_TIME
-    // cerr << "Emitter executed " << *executed_secs << " secs\n";
-#endif
-}
-
+/* Looping function */
 void* ManyLinesEmitter::svc(void * t){
+    int i = 0;
+    char* s = new char[100];
+    
 #ifdef PRINT_EXEC_TIME
+    /* Track execution time and excutions number */
     struct timespec start, end;
     clock_gettime(CLOCK_REALTIME, &start);
     *svc_executions = *svc_executions + 1;
 #endif
-    if(!graph_file){
-            return EOS;
-    }
-    int i = 0;
-    char* s = new char[100];
+    
+    if(!graph_file){ return EOS; }
+    
     multi_task_t* tsk = new multi_task_t(granularity);
+    
     graph_file.getline(s, 100);
     while(graph_file.gcount() != 0 && i < granularity){
         linenum++;
-        tsk->add_task(string(s), linenum);
+        tsk->add_task(s, linenum);
         graph_file.getline(s, 100);
         i++;
     }
@@ -89,8 +91,8 @@ void* EmitterNoIO::svc(void* t){
     
     multi_task_t* tsk = new multi_task_t(granularity);
     while(linenum < graph.size() && i < granularity){
-       linenum++;       
-       tsk->add_task(string(graph[linenum - 1]), linenum);
+       linenum++;
+       tsk->add_task(strdup(graph[linenum - 1]), linenum);
        i++;
     }
     
@@ -114,6 +116,8 @@ void* EmitterNoIO::svc(void* t){
 
 /* MANYLINESWORKER */
 void* ManyLinesWorker::svc(void* t){
+    pair<node_t,node_t> found;
+    
     #ifdef PRINT_EXEC_TIME
     struct timespec start, end;
     clock_gettime(CLOCK_REALTIME, &start);
@@ -122,7 +126,19 @@ void* ManyLinesWorker::svc(void* t){
 
     multi_task_t* task = (multi_task_t*) t;
     for(int i = 0; i < task->get_count(); i++){
-        parse_line(task->lines[i]);
+        single_task_t cur = task->lines[i];
+        string curline (cur.line); 
+        found = parse_and_check_line(&curline, &needles);
+        
+        if(found.first != NULL_NODE){
+            pair<node_t,int>* res =  new pair<node_t,int>(found.second, cur.linenum);
+            ff_send_out(res);
+        }
+        
+        if(found.second != NULL_NODE){
+            pair<node_t,int>* res =  new pair<node_t,int>(found.second, cur.linenum);
+            ff_send_out(res);
+        }
     }
     
     delete task;
@@ -139,42 +155,6 @@ void ManyLinesWorker::svc_end(){
 #ifdef PRINT_EXEC_TIME
     // cerr << "Worker " << get_my_id() << " executed " << *executed_secs << " secs\n";
 #endif
-}
-
-void ManyLinesWorker::parse_line(single_task_t task){
-    /* Ignore comments */
-    if(task.line[0] == '#') return;
-   
-    string first = task.line.substr(0, task.line.find("\t"));
-    string second = task.line.substr(task.line.find("\t") + 1, task.line.find("\r") - 1 - task.line.find("\t"));
-   
-    list<string>::iterator it;
-    for(it = needles.begin(); it != needles.end(); it++){
-        #ifdef DEBUG
-         cout << "Comparo " << (*it) << " e " << first << " e " << second << "\n";
-        #endif
-       if((*it).compare(first) == 0){
-           found_node(task.linenum, *it);
-       }
-       if((*it).compare(second) == 0){
-           found_node(task.linenum, *it);
-       }
-   }
-}
-
-void ManyLinesWorker::found_node(int linenum, std::string needle){
-    char* line_num = new char[50];
-    
-    sprintf(line_num, "%d :",linenum);
-    string* res = new string (line_num);
-    res->append(needle);
-
-    ff_send_out(res);
-    delete[] line_num;
-}
-
-void PrinterWorker::found_node(int linenum, string needle){
-    cout << needle << " : " << linenum << "\n";
 }
 
 void * Collector::svc(void * t){
@@ -204,7 +184,7 @@ void Collector::print_res(){
 }
 
 void Collector::svc_end(){
-    print_res();
+    // print_res();
 #ifdef PRINT_EXEC_TIME
     // cerr << "Collector executed " << *executed_secs << " secs\n";
 #endif

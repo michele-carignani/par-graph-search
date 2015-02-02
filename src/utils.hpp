@@ -26,7 +26,10 @@ bool is_set_par_deg(int argc);
 
 bool is_set_granularity(int argc);
 
-void parse_and_check_line(single_task_t task, std::list<std::string> needles, std::list<std::string>* res);
+/** \return a pair containing zero, one or two strings found in the line
+ *
+ */
+std::pair<node_t, node_t> parse_and_check_line(std::string* line, std::list<std::string>* needles);
 
 void list_found_node(std::list<std::string>* res, int linenum, std::string needle);
 

@@ -12,6 +12,9 @@
 #define DEFAULT_GRANULARITY 20
 #define DEFAULT_WORKERS_NUM 2
 
+typedef std::string node_t;
+
+#define NULL_NODE ""
 /** 
 *    A single task for parallel graph search.
 *    Represents an edge i.e. a line of the graph
@@ -19,10 +22,10 @@
 */
 typedef struct single_line_task {
     public:
-    single_line_task(): line(""), linenum(-1) {};
-    single_line_task(std::string l, int ln): line(l), linenum(ln) {};
+    single_line_task(): line(NULL), linenum(-1) {};
+    single_line_task(char* l, int ln): line(l), linenum(ln) {};
     ~single_line_task(){};
-    std::string line; /** The edge represented as a string */
+    char* line; /** The edge represented as a string */
     int linenum; /** The position in the graph file */
 } single_task_t;
 
@@ -48,9 +51,9 @@ typedef struct multi_lines_task {
         delete[] lines;
     }
 
-    void add_task(std::string line, int num){
+    void add_task(char* line, int num){
         lines[count].linenum = num;
-        lines[count].line = std::string(line);
+        lines[count].line = line;
         count++;
     }
 

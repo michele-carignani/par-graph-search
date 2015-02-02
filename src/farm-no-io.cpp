@@ -95,6 +95,7 @@ int main(int argc, char** argv) {
     #endif
 
 #ifdef PRINT_EXEC_TIME
+
     cerr << elapsed_time_secs(start, end);
     cerr << "\nEmitter: " << emitter_execs << " times,\t" << emitter_time << " secs,\t"<< (emitter_time / emitter_execs) <<" avg\n";
     cerr << "Collector: " << collector_execs << " times,\t" << collector_time << " secs,\t"<< (collector_time / collector_execs) <<" avg\n";
@@ -104,7 +105,7 @@ int main(int argc, char** argv) {
         avg_we += workers_execs[j];
     }
     cerr << "Workers avg: " << (avg_we / nw) << " times,\t" <<  (avg_wt / nw) << " secs,\t"<< (avg_wt / avg_we) <<" avg\n";;
-    
+
 #endif
     return 0;
 }
