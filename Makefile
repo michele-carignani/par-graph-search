@@ -40,7 +40,7 @@ seq-mic: utils-mic src/seq.cpp
 farm-mic : nodes-mic utils-mic src/farm.cpp
 	$(ICC) $(I_VARS) -I$(FF_ROOT) src/$(subst -mic,,$@).cpp src/mic/utils.o src/mic/nodes.o -o build/mic/$(subst -mic,,$@) -lpthread -lrt
 	
-farm-no-io-mic : nodes-mic utils-mic farm-no-io.cpp
+farm-no-io-mic : nodes-mic utils-mic src/farm-no-io.cpp
 	$(ICC) $(I_VARS) -I$(FF_ROOT) src/$(subst -mic,,$@).cpp src/mic/utils.o src/mic/nodes.o -o build/mic/$(subst -mic,,$@) -lpthread -lrt
 
 map-mic: utils-mic src/map.cpp
