@@ -56,14 +56,14 @@ class ManyLinesEmitter : public ff::ff_node {
 class EmitterNoIO : public ff::ff_node {
     private:
         unsigned int linenum;
-		#ifdef PRINT_EXEC_TIME
-        float* executed_secs;
-		int* svc_executions;
-		#endif
         
 	protected:
 		std::vector<char*>* graph;
 		int granularity;
+		#ifdef PRINT_EXEC_TIME
+        float* executed_secs;
+		int* svc_executions;
+		#endif
 		
     public:
         /**
@@ -75,8 +75,8 @@ class EmitterNoIO : public ff::ff_node {
             linenum(0), graph(graph), granularity(g){};
 		
 		#ifdef PRINT_EXEC_TIME
-		EmitterNoIO(std::vector<char*> graph, int g, float* ex_secs, int* execs) : 
-			linenum(0), granularity(g), graph(graph),
+		EmitterNoIO(std::vector<char*>* graph, int g, float* ex_secs, int* execs) : 
+			linenum(0), graph(graph), granularity(g),
 			executed_secs(ex_secs), svc_executions(execs) {};
 		#endif
             
@@ -145,22 +145,47 @@ class Collector : public ff::ff_node {
 };
 
 /* ************************** ITERATOR EMITTER *****************************  */
-class IteratorEmitter : public EmitterNoIO {
+class IteratorEmitter : public ff::ff_node {
 private:
 	int curr = 0;
+	std::vector<char*>* graph;
+	int granularity;
+	#ifdef PRINT_EXEC_TIME
+	float* executed_secs;
+	int* svc_executions;
+	#endif
+	
 public:
 	IteratorEmitter (std::vector<char*>* graph, int g = 20) : 
-		EmitterNoIO(graph,g) {  };
+		graph(graph), granularity(g) {};
+	
+	#ifdef PRINT_EXEC_TIME
+	IteratorEmitter(std::vector<char*>* graph, int g, float* ex_secs, int* execs) :
+		graph(graph), granularity(g), executed_secs(ex_secs), svc_executions(execs) {};
+	#endif
+		
 	void* svc(void* t);
 };
 
-/* ************************** ITERATOR EMITTER *****************************  */
+/* ************************** ITERATOR WORKER *****************************  */
 class IteratorWorker : public ManyLinesWorker {
 	public:
 	IteratorWorker (std::list<std::string> ns):
 		ManyLinesWorker(ns) {};
+	#ifdef PRINT_EXEC_TIME
+	IteratorWorker (std::list<std::string> ns, float* ex_secs, int* execs) :
+		ManyLinesWorker(ns, ex_secs, execs) {};
+	#endif
 	void* svc(void* t);
 	
+};
+
+/* ************************** PROFILED NODE ******************************** */
+class ProfiledNode : public ff::ff_node {
+	float* executed_secs;
+	int* svc_executions;
+	
+	void* svc(void* t);
 };
 
 #endif // _NODES_HPP

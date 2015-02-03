@@ -65,7 +65,7 @@ int main(int argc, char** argv) {
     IteratorEmitter em (&edgelist, g);
     Collector col;
 #else
-    EmitterNoIO em (&edgelist, g, &emitter_time, &emitter_execs);
+    IteratorEmitter em (&edgelist, g, &emitter_time, &emitter_execs);
     Collector col(&collector_time, &collector_execs);
 #endif
     vector<ff_node *> workers;
@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
         IteratorWorker* w = new IteratorWorker (needles) ;
 #else 
         workers_execs[j] = 0; workers_times[j] = 0;
-        ManyLinesWorker* w = new ManyLinesWorker (needles, &(workers_times[j]), &(workers_execs[j])) ;
+        IteratorWorker* w = new IteratorWorker (needles, &(workers_times[j]), &(workers_execs[j])) ;
 #endif
         
         #ifdef USE_AFFINITY

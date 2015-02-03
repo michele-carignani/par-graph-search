@@ -89,6 +89,9 @@ void* EmitterNoIO::svc(void* t){
     
     int i = 0;
     
+    cout << "no way e" << endl;
+    cerr << "no way e" << endl;
+    
     multi_task_t* tsk = new multi_task_t(granularity);
     while(linenum < graph->size() && i < granularity){
        linenum++;
@@ -194,19 +197,32 @@ void Collector::svc_end(){
 /* ************************ ITERATOR EMITTER ******************************** */
 
 void* IteratorEmitter::svc(void* t){
+
+#ifdef PRINT_EXEC_TIME
+    struct timespec start, end;
+    clock_gettime(CLOCK_REALTIME, &start);
+    *svc_executions = *svc_executions + 1;
+#endif
+    
     bool finish = false;
-    unsigned int end = curr + granularity;
-    if(end > graph->size()){
-        end  = graph->size();
+    unsigned int last = curr + granularity;
+    if(last > graph->size()){
+        last  = graph->size();
         finish = true;
     }
     
-    ff_send_out(new it_task_t(graph, curr, end));
-    curr = end;
+    ff_send_out(new it_task_t(graph, curr, last));
+    curr = last;
     
     if(finish){
         return EOS;
     }
+    
+    #ifdef PRINT_EXEC_TIME
+    clock_gettime(CLOCK_REALTIME, &end);
+    *executed_secs += elapsed_time_secs(start, end);
+    #endif
+
     return GO_ON;
 }
 
@@ -215,6 +231,12 @@ void* IteratorEmitter::svc(void* t){
 void* IteratorWorker::svc(void* t){
     pair<node_t,node_t> found;
     it_task_t* task = (it_task_t*) t;
+    
+    #ifdef PRINT_EXEC_TIME
+    struct timespec start, end;
+    clock_gettime(CLOCK_REALTIME, &start);
+    *svc_executions = *svc_executions + 1;
+    #endif
     
     for(unsigned int k = task->start; k < task->end; k++){
         string s = string((*(task->graph))[k]);
@@ -233,6 +255,11 @@ void* IteratorWorker::svc(void* t){
     }
     
     delete task;
+    
+    #ifdef PRINT_EXEC_TIME
+    clock_gettime(CLOCK_REALTIME, &end);
+    *executed_secs += elapsed_time_secs(start, end);
+    #endif
     
     return GO_ON;
 }
