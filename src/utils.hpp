@@ -8,6 +8,7 @@
 #include <list>
 #include <string>
 #include <functional>
+#include <vector>
 #include "graph-search.hpp"
 
 void usage(int argc, char** argv);

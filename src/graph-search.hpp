@@ -93,4 +93,12 @@ public:
     bytes_task(int st, int si): start(st), size(si) {};
 } bytes_task_t;
 
+typedef struct iterator_task {
+	std::vector<char*>* graph;
+	unsigned int start;
+	unsigned int end;
+	iterator_task(std::vector<char*>* g, int s,int e) :
+		graph(g), start(s), end(e) {};
+} it_task_t ;
+
 #endif

@@ -10,7 +10,7 @@ using namespace std;
 using namespace ff;
 
 
-/*        MANY LINES EMITTER      */
+/* ************************  MANY LINES EMITTER **************************** */
 
 /* Constructor  */
 ManyLinesEmitter::ManyLinesEmitter(char* pathname, int g){
@@ -73,7 +73,7 @@ void* ManyLinesEmitter::svc(void * t){
     return GO_ON;
 }
 
-/*     EMITTERNOIO     */
+/* ****************************   EMITTER-NO-IO *************************     */
 void EmitterNoIO::svc_end(){
 #ifdef PRINT_EXEC_TIME
    //  cerr << "Emitter executed " << *executed_secs << " secs\n";
@@ -90,9 +90,9 @@ void* EmitterNoIO::svc(void* t){
     int i = 0;
     
     multi_task_t* tsk = new multi_task_t(granularity);
-    while(linenum < graph.size() && i < granularity){
+    while(linenum < graph->size() && i < granularity){
        linenum++;
-       tsk->add_task(strdup(graph[linenum - 1]), linenum);
+       tsk->add_task(strdup((*graph)[linenum - 1]), linenum);
        i++;
     }
     
@@ -114,7 +114,8 @@ void* EmitterNoIO::svc(void* t){
     return GO_ON;
 }
 
-/* MANYLINESWORKER */
+/* ******************************** MANYLINESWORKER ************************* */
+
 void* ManyLinesWorker::svc(void* t){
     pair<node_t,node_t> found;
     
@@ -189,3 +190,52 @@ void Collector::svc_end(){
     // cerr << "Collector executed " << *executed_secs << " secs\n";
 #endif
 }
+
+/* ************************ ITERATOR EMITTER ******************************** */
+
+void* IteratorEmitter::svc(void* t){
+    bool finish = false;
+    unsigned int end = curr + granularity;
+    if(end > graph->size()){
+        end  = graph->size();
+        finish = true;
+    }
+    
+    ff_send_out(new it_task_t(graph, curr, end));
+    curr = end;
+    
+    if(finish){
+        return EOS;
+    }
+    return GO_ON;
+}
+
+/* ************************ ITERATOR WORKER ********************************* */
+
+void* IteratorWorker::svc(void* t){
+    pair<node_t,node_t> found;
+    it_task_t* task = (it_task_t*) t;
+    
+    for(unsigned int k = task->start; k < task->end; k++){
+        string s = string((*(task->graph))[k]);
+        found = parse_and_check_line( &s, &needles);
+    
+        if(found.first != NULL_NODE){
+            pair<node_t,int>* res =  new pair<node_t,int>(found.second, k);
+            ff_send_out(res);
+        }
+
+        if(found.second != NULL_NODE){
+            pair<node_t,int>* res =  new pair<node_t,int>(found.second, k);
+            ff_send_out(res);
+        }
+    
+    }
+    
+    delete task;
+    
+    return GO_ON;
+}
+
+/* ********************* BYTES_EMITTER ************************************** */
+

@@ -38,6 +38,8 @@ int main(int argc, char** argv) {
     cout << "Workers num: " << nw << ", Granularity: " << g << " \n";
     #endif
     
+    // Load edge list into memory
+    
     graph_file.open(graph_file_path);
     
     i = 1;
@@ -60,16 +62,16 @@ int main(int argc, char** argv) {
 #endif
     
 #ifndef PRINT_EXEC_TIME
-    EmitterNoIO em (edgelist, g);
+    IteratorEmitter em (&edgelist, g);
     Collector col;
 #else
-    EmitterNoIO em (edgelist, g, &emitter_time, &emitter_execs);
+    EmitterNoIO em (&edgelist, g, &emitter_time, &emitter_execs);
     Collector col(&collector_time, &collector_execs);
 #endif
     vector<ff_node *> workers;
     for(int j = 0; j < nw; j++){
 #ifndef PRINT_EXEC_TIME
-        ManyLinesWorker* w = new ManyLinesWorker (needles) ;
+        IteratorWorker* w = new IteratorWorker (needles) ;
 #else 
         workers_execs[j] = 0; workers_times[j] = 0;
         ManyLinesWorker* w = new ManyLinesWorker (needles, &(workers_times[j]), &(workers_execs[j])) ;
@@ -96,7 +98,6 @@ int main(int argc, char** argv) {
 
 #ifdef PRINT_EXEC_TIME
 
-    cerr << elapsed_time_secs(start, end);
     cerr << "\nEmitter: " << emitter_execs << " times,\t" << emitter_time << " secs,\t"<< (emitter_time / emitter_execs) <<" avg\n";
     cerr << "Collector: " << collector_execs << " times,\t" << collector_time << " secs,\t"<< (collector_time / collector_execs) <<" avg\n";
     float avg_wt=0, avg_we=0;

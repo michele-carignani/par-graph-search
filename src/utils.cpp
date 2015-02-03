@@ -31,7 +31,7 @@ void load_needles_list(int argc, char** argv, list<string>* needles){
     needles_file.open(argv[2]);
     
     if(!needles_file){
-        cout << "errore apertura file\n";
+        cerr << "Error opening needles file: " << argv[2] << ".\n";
         exit(0);
     }
 

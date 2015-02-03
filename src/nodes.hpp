@@ -56,21 +56,23 @@ class ManyLinesEmitter : public ff::ff_node {
 class EmitterNoIO : public ff::ff_node {
     private:
         unsigned int linenum;
-        int granularity;
-        std::vector<char*> graph;
 		#ifdef PRINT_EXEC_TIME
         float* executed_secs;
 		int* svc_executions;
 		#endif
         
+	protected:
+		std::vector<char*>* graph;
+		int granularity;
+		
     public:
         /**
          * 
          * @param graph Vector of lines of the edgelist file
          * @param g Size of the multi_task_t task
          */
-        EmitterNoIO(std::vector<char*> graph, int g = 20):
-            linenum(0), granularity(g), graph(graph){};
+        EmitterNoIO(std::vector<char*>* graph, int g = 20):
+            linenum(0), graph(graph), granularity(g){};
 		
 		#ifdef PRINT_EXEC_TIME
 		EmitterNoIO(std::vector<char*> graph, int g, float* ex_secs, int* execs) : 
@@ -83,6 +85,7 @@ class EmitterNoIO : public ff::ff_node {
         void svc_end();
 };
 
+/* **************************** MANY LINES WORKER *************************** */
 
 /** 
  *  Defines a worker that takes a multi_task_t task and 
@@ -90,7 +93,7 @@ class EmitterNoIO : public ff::ff_node {
  *  found, the found_node() method is called.
  */
 class ManyLinesWorker : public ff::ff_node {
-    private:
+    protected:
     std::list<std::string> needles; /** List of nodes to be looked for */
 #ifdef PRINT_EXEC_TIME
     float* executed_secs;
@@ -139,6 +142,25 @@ class Collector : public ff::ff_node {
     void * svc(void * t);
     void svc_end();
     void print_res();
+};
+
+/* ************************** ITERATOR EMITTER *****************************  */
+class IteratorEmitter : public EmitterNoIO {
+private:
+	int curr = 0;
+public:
+	IteratorEmitter (std::vector<char*>* graph, int g = 20) : 
+		EmitterNoIO(graph,g) {  };
+	void* svc(void* t);
+};
+
+/* ************************** ITERATOR EMITTER *****************************  */
+class IteratorWorker : public ManyLinesWorker {
+	public:
+	IteratorWorker (std::list<std::string> ns):
+		ManyLinesWorker(ns) {};
+	void* svc(void* t);
+	
 };
 
 #endif // _NODES_HPP
