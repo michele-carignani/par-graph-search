@@ -6,6 +6,7 @@
 #define _GRAPH_SEARCH_HPP
 
 #include <string>
+#include <cstring>
 #include <list>
 #include <vector>
 #include <time.h>
@@ -13,9 +14,75 @@
 #define DEFAULT_GRANULARITY 20
 #define DEFAULT_WORKERS_NUM 2
 
-typedef std::string node_t;
+// todo controllare lunghezza parola
+#define MAX_NODE_LENGTH 50
 
-#define NULL_NODE ""
+/* ************************* INT_NODE_T ************************************* */
+
+typedef struct int_node_struct {
+	public:
+		// todo allineare
+	unsigned int nval;
+	
+	int_node_struct(unsigned int n) : nval(n) {};
+	int_node_struct(char* s)  { nval = atoi(s); }; 
+	
+	bool operator==(int_node_struct n1){
+		return n1.nval == this->nval;
+	}
+	
+} int_node_t;
+
+#define INT_NULL_NODE node_t(0);
+
+/* **************************** STR_NODE_T ********************************** */
+
+typedef struct str_node_struct {
+	public:
+	
+	// todo allineare
+	char sval[MAX_NODE_LENGTH];
+	
+	str_node_struct(){
+		sval[0] = '\0';
+	}
+	
+	str_node_struct(char* s){
+		strncpy(sval, s, MAX_NODE_LENGTH);
+		char* carrier  = index(sval, '\r');
+		if(carrier != NULL){
+			*carrier = '\0';
+		}
+	}
+	
+	str_node_struct(std::string s){
+		strncpy(sval, s.c_str(), MAX_NODE_LENGTH);
+	}
+	
+	bool operator==(str_node_struct n1){
+		int i = 0;
+		do {
+			if(n1.sval[i] != this->sval[i]) return false;
+			i++;
+		} while(this->sval[i] != '\0');
+		return true;
+	}
+	
+	void operator=(str_node_struct n1){
+		strncpy(this->sval, n1.sval, MAX_NODE_LENGTH);
+	}
+	
+	bool is_null(){
+		return sval[0] == '\0';
+	}
+	
+} str_node_t;
+
+#define STR_NULL_NODE str_node_t({'\0'})
+
+typedef str_node_t node_t;
+
+#define NULL_NODE node_t({'\0'})
 /** 
 *    A single task for parallel graph search.
 *    Represents an edge i.e. a line of the graph
@@ -24,7 +91,10 @@ typedef std::string node_t;
 typedef struct single_line_task {
     public:
     single_line_task(): line(NULL), linenum(-1) {};
-    single_line_task(char* l, int ln): line(l), linenum(ln) {};
+    single_line_task(char* l, int ln) {
+		linenum = ln;
+		line = strdup(l);
+	};
     ~single_line_task(){};
     char* line; /** The edge represented as a string */
     int linenum; /** The position in the graph file */

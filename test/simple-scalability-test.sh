@@ -12,7 +12,7 @@
 BUILD_DIR=./build
 BINS="farm map farm-no-io"
 
-PAR_DEGS="1 2 4 8 16 32 64"
+PAR_DEGS="1 2 4 8 16 32 64 128 238"
 
 DEFAULT_GRANULARITY=100
 

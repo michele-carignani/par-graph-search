@@ -13,7 +13,7 @@ using namespace std;
 using namespace ff;
 
 /** List of nodes to look for in the graph. */
-list<string> needles;
+list<node_t> needles;
 
 int main(int argc, char** argv) {
     int nw, g, i;

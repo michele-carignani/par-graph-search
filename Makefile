@@ -17,6 +17,9 @@ nodes: src/nodes.hpp src/nodes.cpp src/graph-search.hpp
 seq: utils src/seq.cpp
 	$(CXX) $(C_VARS) src/$@.cpp src/utils.o -o build/$@ -lrt
 
+seq-no-io: utils src/seq-no-io.cpp
+	$(CXX) $(C_VARS) src/$@.cpp src/utils.o -o build/$@ -lrt
+
 farm : nodes utils src/farm.cpp
 	$(CXX) $(C_VARS) src/$@.cpp src/nodes.o src/utils.o -I$(FF_ROOT) -o build/$@ -lpthread -lrt
 
@@ -46,7 +49,7 @@ farm-no-io-mic : nodes-mic utils-mic src/farm-no-io.cpp
 map-mic: utils-mic src/map.cpp
 	$(ICC) $(I_VARS) -I$(FF_ROOT) src/$(subst -mic,,$@).cpp src/mic/utils.o -o build/mic/$(subst -mic,,$@) -lpthread -lrt
 
-all: seq farm map farm-no-io
+all: seq seq-no-io farm map farm-no-io
 
 all-mic: seq-mic farm-mic map-mic farm-no-io-mic
 

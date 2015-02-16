@@ -20,7 +20,7 @@
 
 using namespace std;
 
-list<string> needles;
+list<node_t> needles;
 list<string> results;
 
 /**
@@ -42,14 +42,13 @@ int main(int argc, char* argv[]){
     graph_file.getline(buf, BUF_LEN);
     linenum = 1;
     while(graph_file.gcount() != 0){
-        string line (buf);
-        pair<node_t,node_t> found = parse_and_check_line(&line, &needles);
+        pair<node_t,node_t> found = parse_and_check_line(buf, &needles);
         
-        if(found.first != NULL_NODE){
+        if(!found.first.is_null()){
             list_found_node(&results , linenum, found.first);
         }
-        if(found.second != NULL_NODE){
-            list_found_node(&results, linenum, found.first);
+        if(!found.second.is_null()){
+            list_found_node(&results, linenum, found.second);
         }
         linenum++;
         graph_file.getline(buf, BUF_LEN);
@@ -57,6 +56,12 @@ int main(int argc, char* argv[]){
 
     clock_gettime(CLOCK_REALTIME, &end);
 
+#ifdef PRINT_RESULTS
+    for(auto x : results){
+        cout << x << "\n";
+    }
+#endif
+    
     cerr << elapsed_time_secs(start, end);
 
     return 0;

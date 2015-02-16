@@ -50,6 +50,7 @@ void* ManyLinesEmitter::svc(void * t){
     multi_task_t* tsk = new multi_task_t(granularity);
     
     graph_file.getline(s, 100);
+    cout << "LETTO: " << s << "\n";
     while(graph_file.gcount() != 0 && i < granularity){
         linenum++;
         tsk->add_task(s, linenum);
@@ -75,9 +76,7 @@ void* ManyLinesEmitter::svc(void * t){
 
 /* ****************************   EMITTER-NO-IO *************************     */
 void EmitterNoIO::svc_end(){
-#ifdef PRINT_EXEC_TIME
-   //  cerr << "Emitter executed " << *executed_secs << " secs\n";
-#endif
+
 }
 
 void* EmitterNoIO::svc(void* t){
@@ -88,9 +87,6 @@ void* EmitterNoIO::svc(void* t){
 #endif
     
     int i = 0;
-    
-    cout << "no way e" << endl;
-    cerr << "no way e" << endl;
     
     multi_task_t* tsk = new multi_task_t(granularity);
     while(linenum < graph->size() && i < granularity){
@@ -131,15 +127,14 @@ void* ManyLinesWorker::svc(void* t){
     multi_task_t* task = (multi_task_t*) t;
     for(int i = 0; i < task->get_count(); i++){
         single_task_t cur = task->lines[i];
-        string curline (cur.line); 
-        found = parse_and_check_line(&curline, &needles);
+        found = parse_and_check_line(cur.line, &needles);
         
-        if(found.first != NULL_NODE){
+        if(!found.first.is_null()){
             pair<node_t,int>* res =  new pair<node_t,int>(found.second, cur.linenum);
             ff_send_out(res);
         }
         
-        if(found.second != NULL_NODE){
+        if(!found.second.is_null()){
             pair<node_t,int>* res =  new pair<node_t,int>(found.second, cur.linenum);
             ff_send_out(res);
         }
@@ -168,9 +163,11 @@ void * Collector::svc(void * t){
     clock_gettime(CLOCK_REALTIME, &start);
     *svc_executions = *svc_executions + 1;
     #endif
-
-    string* res = (string*) t;
-    found_nodes.push_back(*res);
+   
+    pair<node_t,int>* res = (pair<node_t,int>*) t;
+    char res_str[50];
+    sprintf(res_str,"%d : %s", res->second, res->first.sval);
+    found_nodes.push_back(string(res_str));
     delete res;
     
     #ifdef PRINT_EXEC_TIME
@@ -188,9 +185,8 @@ void Collector::print_res(){
 }
 
 void Collector::svc_end(){
-    // print_res();
-#ifdef PRINT_EXEC_TIME
-    // cerr << "Collector executed " << *executed_secs << " secs\n";
+#ifdef PRINT_RESULTS
+    print_res();
 #endif
 }
 
@@ -239,16 +235,15 @@ void* IteratorWorker::svc(void* t){
     #endif
     
     for(unsigned int k = task->start; k < task->end; k++){
-        string s = string((*(task->graph))[k]);
-        found = parse_and_check_line( &s, &needles);
+        found = parse_and_check_line( (*(task->graph))[k], &needles);
     
-        if(found.first != NULL_NODE){
-            pair<node_t,int>* res =  new pair<node_t,int>(found.second, k);
+        if(!found.first.is_null()){
+            pair<node_t,int>* res =  new pair<node_t,int>(found.second, k+1);
             ff_send_out(res);
         }
 
-        if(found.second != NULL_NODE){
-            pair<node_t,int>* res =  new pair<node_t,int>(found.second, k);
+        if(!found.second.is_null()){
+            pair<node_t,int>* res =  new pair<node_t,int>(found.second, k+1);
             ff_send_out(res);
         }
     

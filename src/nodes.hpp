@@ -94,16 +94,16 @@ class EmitterNoIO : public ff::ff_node {
  */
 class ManyLinesWorker : public ff::ff_node {
     protected:
-    std::list<std::string> needles; /** List of nodes to be looked for */
+    std::list<node_t> needles; /** List of nodes to be looked for */
 #ifdef PRINT_EXEC_TIME
     float* executed_secs;
 	int* svc_executions;
 #endif
     
     public:
-    ManyLinesWorker (std::list<std::string> ns) : needles(ns) {};
+    ManyLinesWorker (std::list<node_t> ns) : needles(ns) {};
 	#ifdef PRINT_EXEC_TIME
-	ManyLinesWorker(std::list<std::string> ns, float* ex_secs, int* execs) : 
+	ManyLinesWorker(std::list<node_t> ns, float* ex_secs, int* execs) : 
 		needles(ns), executed_secs(ex_secs), svc_executions(execs) {};
 	#endif
     ~ManyLinesWorker () {};
@@ -118,8 +118,8 @@ class ManyLinesWorker : public ff::ff_node {
  */
 class PrinterWorker : public ManyLinesWorker {
     public:
-    PrinterWorker(std::list<std::string> ns) : ManyLinesWorker(ns) {};
-    void found_node(int linenum, std::string needle);
+    PrinterWorker(std::list<node_t> ns) : ManyLinesWorker(ns) {};
+    void found_node(int linenum, node_t needle);
 };
 
  /** Describes a simple collector for graph search.
@@ -170,10 +170,10 @@ public:
 /* ************************** ITERATOR WORKER *****************************  */
 class IteratorWorker : public ManyLinesWorker {
 	public:
-	IteratorWorker (std::list<std::string> ns):
+	IteratorWorker (std::list<node_t> ns):
 		ManyLinesWorker(ns) {};
 	#ifdef PRINT_EXEC_TIME
-	IteratorWorker (std::list<std::string> ns, float* ex_secs, int* execs) :
+	IteratorWorker (std::list<node_t> ns, float* ex_secs, int* execs) :
 		ManyLinesWorker(ns, ex_secs, execs) {};
 	#endif
 	void* svc(void* t);
