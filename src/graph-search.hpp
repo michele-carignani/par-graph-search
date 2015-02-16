@@ -7,6 +7,7 @@
 
 #include <string>
 #include <list>
+#include <vector>
 #include <time.h>
 
 #define DEFAULT_GRANULARITY 20
