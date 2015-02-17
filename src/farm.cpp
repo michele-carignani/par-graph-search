@@ -13,7 +13,7 @@
 using namespace std;
 using namespace ff;
 
-list<string> needles;
+list<node_t> needles;
 
 int main(int argc, char* argv[]){
 
