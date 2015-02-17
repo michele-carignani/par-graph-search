@@ -18,6 +18,7 @@ using namespace ff;
 
 list<node_t> needles;
 list<string> results;
+list<string>* local_results;
 
 int main(int argc, char** argv){
     
@@ -32,6 +33,8 @@ int main(int argc, char** argv){
     int nw, g, file_length;
 
     get_conf(argc, argv, &graph_filename, &needles, &nw, &g);
+    
+    local_results = new list<string>[nw];
     
     graph_file.open(graph_filename);
 
@@ -49,47 +52,30 @@ int main(int argc, char** argv){
     clock_gettime(CLOCK_REALTIME, &end_io);
     #endif
 
-    if(is_set_par_deg(argc)){
-        ParallelFor pf(nw);
-        if(is_set_granularity(argc)){
-            // dynamic scheduling with stride g and par deg nw
-            pf.parallel_for(0,file_length-1, 1, g, [&edgelist](const int k){
-                pair<node_t, node_t> res = parse_and_check_line(edgelist[k], &needles);
-                if(!res.first.is_null()){
-                    list_found_node(&results, k+1, res.first);
-                }
-                if(!res.second.is_null()){
-                    list_found_node(&results, k+1, res.second);
-                }
-                
-            });
-        } else {
-            // static scheduling with auto strides
-            pf.parallel_for(0,file_length-1, 1, [&edgelist](const int k){
-                pair<node_t, node_t> res = parse_and_check_line(edgelist[k], &needles);
-                if(!res.first.is_null()){
-                    list_found_node(&results, k+1, res.first);
-                }
-                if(!res.second.is_null()){
-                    list_found_node(&results, k+1, res.second);
-                }
-            });
-        }
-    } else {
-        ParallelFor pf;
-        // dynamic scheduling with auto par deg and auto strides
-        pf.parallel_for(0,file_length-1,  [&edgelist](const int k){
+    auto workerF = [&edgelist](const int start, const int end, const int thid ){
+        if (start == end) return;
+        list<string>* my_local_results = &(local_results[thid]);
+        for(int k = start; k < end; k++){
             pair<node_t, node_t> res = parse_and_check_line(edgelist[k], &needles);
-            if(!res.first.is_null()){
-                list_found_node(&results, k+1, res.first);
-            }
-            if(!res.second.is_null()){
-                list_found_node(&results, k+1, res.second);
-            }
-        });
+            if(!res.first.is_null()){ list_found_node(my_local_results, k+1, res.first); }
+            if(!res.second.is_null()){ list_found_node(my_local_results, k+1, res.second); }
+        }
+    };
+    
+    ParallelFor pf(nw);
+    if(is_set_granularity(argc)){
+        // dynamic scheduling with stride g and par deg nw
+        pf.parallel_for_idx(0,file_length-1, 1, g, workerF);
+    } else {
+        // static scheduling with auto strides
+        pf.parallel_for_idx(0,file_length-1, 1, 1, workerF);
     }
     
+    for(int j = 0; j < nw; j++){
+        results.merge(local_results[j]);
+    }
     clock_gettime(CLOCK_REALTIME, &end);
+    
 #ifdef PRINT_RESULTS
     for(auto x: results){
         cout << x << "\n";
