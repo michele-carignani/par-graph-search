@@ -14,6 +14,8 @@ using namespace ff;
 
 /* Constructor  */
 ManyLinesEmitter::ManyLinesEmitter(char* pathname, int g){
+    linenum = 0;
+    granularity = 20; 
     graph_file.open(pathname);
     if(!graph_file){
         error("Opening graph file");
@@ -207,7 +209,13 @@ void* IteratorEmitter::svc(void* t){
         finish = true;
     }
     
-    ff_send_out(new it_task_t(graph, curr, last));
+#ifdef ON_MIC
+    it_task_t* tskbuf = (it_task_t*) __mm_alloc(sizeof(it_task_t), 64);
+#else
+    it_task_t* tskbuf = (it_task_t*) malloc(sizeof(it_task_t));
+#endif
+    it_task_t* tsk = new (tskbuf) it_task_t(graph, curr, last);
+    ff_send_out(tsk);
     curr = last;
     
     if(finish){

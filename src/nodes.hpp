@@ -23,8 +23,8 @@
  */
 class ManyLinesEmitter : public ff::ff_node {
     private:
-    int linenum = 0; /** Keeps track of number of lines read */
-    int granularity = 20; /** Size of the tasks emitted */
+    int linenum; /** Keeps track of number of lines read */
+    int granularity; /** Size of the tasks emitted */
     std::ifstream graph_file; /** Data file containing graph as an edge list */
 
 	#ifdef PRINT_EXEC_TIME
@@ -147,7 +147,7 @@ class Collector : public ff::ff_node {
 /* ************************** ITERATOR EMITTER *****************************  */
 class IteratorEmitter : public ff::ff_node {
 private:
-	int curr = 0;
+	int curr;
 	std::vector<char*>* graph;
 	int granularity;
 	#ifdef PRINT_EXEC_TIME
@@ -157,7 +157,7 @@ private:
 	
 public:
 	IteratorEmitter (std::vector<char*>* graph, int g = 20) : 
-		graph(graph), granularity(g) {};
+		curr(0), graph(graph), granularity(g) {};
 	
 	#ifdef PRINT_EXEC_TIME
 	IteratorEmitter(std::vector<char*>* graph, int g, float* ex_secs, int* execs) :

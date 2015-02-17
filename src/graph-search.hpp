@@ -21,8 +21,7 @@
 
 typedef struct int_node_struct {
 	public:
-		// todo allineare
-	unsigned int nval;
+	unsigned int nval __attribute__((aligned(64)));
 	
 	int_node_struct(unsigned int n) : nval(n) {};
 	int_node_struct(char* s)  { nval = atoi(s); }; 
@@ -41,7 +40,7 @@ typedef struct str_node_struct {
 	public:
 	
 	// todo allineare
-	char sval[MAX_NODE_LENGTH];
+	char sval[MAX_NODE_LENGTH] __attribute__((aligned(64)));
 	
 	str_node_struct(){
 		sval[0] = '\0';
@@ -108,14 +107,16 @@ typedef struct single_line_task {
 */
 typedef struct multi_lines_task {
     private:
-    int size = 1;
-    int count = 0;
+    int size;
+    int count;
     
     public:
     single_task_t* lines; /** The edges assigned to the task */
     
-    multi_lines_task(int size){
-        lines = new single_task_t[size];
+    multi_lines_task(int s){
+		size = size;
+		count = 0;
+        lines = new single_task_t[s];
     };    
     
     ~multi_lines_task(){
@@ -157,8 +158,8 @@ public:
 *   newlines characters.
 */
 typedef struct bytes_task {
-    int start = 0;
-    int size = 0;
+    int start;
+    int size;
 
 public:
     bytes_task(int st, int si): start(st), size(si) {};
