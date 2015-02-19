@@ -28,6 +28,11 @@ for b in $BINS ; do
 	diff $sorted_res $tmpfile.sorted > /dev/null 
 	if [ $? -ne 0 ] ; then
 		echo "$b : fail"
+		echo "-- EXPECTED : --"
+		cat $sorted_res
+		echo "-- RECEIVED : --"
+		cat $tmpfile.sorted
+		echo "-- --"
 	else
 		echo "$b : success"
 	fi
