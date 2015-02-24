@@ -21,13 +21,29 @@
 
 typedef struct int_node_struct {
 	public:
+#ifdef ON_MIC
 	unsigned int nval __attribute__((aligned(64)));
+#else
+	unsigned int nval;
+#endif
 	
 	int_node_struct(unsigned int n) : nval(n) {};
 	int_node_struct(char* s)  { nval = atoi(s); }; 
+	int_node_struct(std::string s)  { nval = std::stoi(s); }; 
+	int_node_struct() { nval = 0; }
 	
 	bool operator==(int_node_struct n1){
 		return n1.nval == this->nval;
+	}
+	
+	bool is_null(){
+		return nval == 0;
+	}
+	
+	char* str(){
+		char* res = (char*) malloc(sizeof(char) * MAX_NODE_LENGTH);
+		sprintf(res, "%d", nval);
+		return res;
 	}
 	
 } int_node_t;
@@ -39,8 +55,11 @@ typedef struct int_node_struct {
 typedef struct str_node_struct {
 	public:
 	
-	// todo allineare
+#ifdef ON_MIC
 	char sval[MAX_NODE_LENGTH] __attribute__((aligned(64)));
+#else
+	char sval[MAX_NODE_LENGTH];
+#endif
 	
 	str_node_struct(){
 		sval[0] = '\0';
@@ -75,13 +94,21 @@ typedef struct str_node_struct {
 		return sval[0] == '\0';
 	}
 	
+	char* str(){
+		return strdup(sval);
+	}
+	
 } str_node_t;
-
 #define STR_NULL_NODE str_node_t({'\0'})
 
-typedef str_node_t node_t;
-
+#ifdef USE_INT_NODES
+#define NULL_NODE node_t(0)
+typedef int_node_t node_t;
+#else
 #define NULL_NODE node_t({'\0'})
+typedef str_node_t node_t;
+#endif
+
 /** 
 *    A single task for parallel graph search.
 *    Represents an edge i.e. a line of the graph

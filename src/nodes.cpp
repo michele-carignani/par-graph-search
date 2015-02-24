@@ -129,7 +129,7 @@ void* ManyLinesWorker::svc(void* t){
     multi_task_t* task = (multi_task_t*) t;
     for(int i = 0; i < task->get_count(); i++){
         single_task_t cur = task->lines[i];
-        found = parse_and_check_line(cur.line, &needles);
+        found = parse_and_check_line(cur.line, needles, needles_count);
         
         if(!found.first.is_null()){
             pair<node_t,int>* res =  new pair<node_t,int>(found.second, cur.linenum);
@@ -158,6 +158,8 @@ void ManyLinesWorker::svc_end(){
 #endif
 }
 
+/* ***************************** COLLECTOR ********************************** */
+
 void * Collector::svc(void * t){
 
     #ifdef PRINT_EXEC_TIME
@@ -168,7 +170,9 @@ void * Collector::svc(void * t){
    
     pair<node_t,int>* res = (pair<node_t,int>*) t;
     char res_str[50];
-    sprintf(res_str,"%d : %s", res->second, res->first.sval);
+    char* str_val = res->first.str();
+    sprintf(res_str,"%d : %s", res->second, str_val);
+    free(str_val);
     found_nodes.push_back(string(res_str));
     delete res;
     
@@ -243,7 +247,7 @@ void* IteratorWorker::svc(void* t){
     #endif
     
     for(unsigned int k = task->start; k < task->end; k++){
-        found = parse_and_check_line( (*(task->graph))[k], &needles);
+        found = parse_and_check_line( (*(task->graph))[k], needles, needles_count);
     
         if(!found.first.is_null()){
             pair<node_t,int>* res =  new pair<node_t,int>(found.second, k+1);

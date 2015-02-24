@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <list>
+#include <vector>
 #include <fstream>
 #include "utils.hpp"
 
@@ -25,7 +26,7 @@ void open_graph_file(int argc, char** argv, char** input_path) {
     *input_path = argv[1];
 }
 
-void load_needles_list(int argc, char** argv, list<node_t>* needles){
+void load_needles_list(int argc, char** argv, node_t** needles, int* needles_count){
     ifstream needles_file;
     if(argc < 3){
         usage(argc, argv);
@@ -40,12 +41,19 @@ void load_needles_list(int argc, char** argv, list<node_t>* needles){
 
     char buf[50];
     needles_file.getline(buf, 50);
-    
+    vector<node_t> nl;
     while(needles_file /*.gcount() != 0*/){
-      needles->push_back(string(buf));
+      nl.push_back(node_t(buf));
       needles_file.getline(buf, 50);   
     }
-
+    
+#ifdef ON_MIC
+    *needles = __mm_malloc(nl.size() * sizeof(node_t),64);
+#else  
+    *needles = (node_t*) malloc(nl.size() * sizeof(node_t));
+#endif
+    std::copy(nl.begin(), nl.end(), *needles);
+    *needles_count = nl.size();
 }
 
 int get_workers_num(int argc, char** argv){
@@ -70,9 +78,9 @@ bool is_set_granularity(int argc){
     return argc > 4;
 }
 
-void get_conf(int argc, char** argv, char** gf, list<node_t>* ns, int* nw, int* g){
+void get_conf(int argc, char** argv, char** gf, node_t** ns, int* needles_count, int* nw, int* g){
     open_graph_file(argc, argv, gf);
-    load_needles_list(argc, argv, ns);
+    load_needles_list(argc, argv, ns, needles_count);
     *nw = get_workers_num(argc, argv);
     *g = get_granularity(argc, argv);
 }
@@ -104,22 +112,20 @@ pair<node_t,node_t> parse_and_check_line(string* line, list<node_t>* needles){
     return result;
 }
 
-pair<node_t, node_t> parse_and_check_line(char* line, list<node_t>* needles){
+pair<node_t, node_t> parse_and_check_line(char* line, node_t* needles, int needles_count){
     pair<node_t, node_t> result;
     
     if(*line == '#') return result;
     
-    list<node_t>::iterator it;
-    
     node_t fir (strsep(&line, "\t"));
     node_t sec (line);
     
-    for(it = needles->begin(); it != needles->end(); it++){
-        if(fir ==  *it ){
-            result.first = *it;
+    for(int it = 0; it != needles_count; it++){
+        if(fir ==  needles[it] ){
+            result.first = needles[it];
         }
-        if( sec == *it ){
-            result.second = *it;
+        if( sec == needles[it] ){
+            result.second = needles[it];
         }
     }
     return result;
@@ -128,7 +134,9 @@ pair<node_t, node_t> parse_and_check_line(char* line, list<node_t>* needles){
 void list_found_node(list<string>* res, int linenum, node_t it){
     char* line_num = new char[50];
     
-    sprintf(line_num, "%d : %s", linenum, it.sval);
+    char* str_val = it.str();
+    sprintf(line_num, "%d : %s", linenum, str_val);
+    free(str_val);
 
     res->push_back(string(line_num));
     delete[] line_num;

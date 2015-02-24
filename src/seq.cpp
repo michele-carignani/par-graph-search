@@ -20,7 +20,7 @@
 
 using namespace std;
 
-list<node_t> needles;
+node_t* needles;
 list<string> results;
 
 /**
@@ -30,19 +30,19 @@ list<string> results;
 int main(int argc, char* argv[]){
 
     ifstream graph_file;
-    int linenum;
+    int linenum, nsc;
     char buf[BUF_LEN];
     struct timespec start, end;
 
     clock_gettime(CLOCK_REALTIME, &start);
 
-    load_needles_list(argc, argv, &needles);
+    load_needles_list(argc, argv, &needles, &nsc);
 
     graph_file.open(argv[GRAPH_FILENAME_IDX]);
     graph_file.getline(buf, BUF_LEN);
     linenum = 1;
     while(graph_file.gcount() != 0){
-        pair<node_t,node_t> found = parse_and_check_line(buf, &needles);
+        pair<node_t,node_t> found = parse_and_check_line(buf, needles, nsc);
         
         if(!found.first.is_null()){
             list_found_node(&results , linenum, found.first);

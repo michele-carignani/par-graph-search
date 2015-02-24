@@ -94,17 +94,18 @@ class EmitterNoIO : public ff::ff_node {
  */
 class ManyLinesWorker : public ff::ff_node {
     protected:
-    std::list<node_t> needles; /** List of nodes to be looked for */
+    node_t* needles; /** List of nodes to be looked for */
+	int needles_count;
 #ifdef PRINT_EXEC_TIME
     float* executed_secs;
 	int* svc_executions;
 #endif
     
     public:
-    ManyLinesWorker (std::list<node_t> ns) : needles(ns) {};
+    ManyLinesWorker (node_t* ns, int nsc) : needles(ns), needles_count(nsc) {};
 	#ifdef PRINT_EXEC_TIME
-	ManyLinesWorker(std::list<node_t> ns, float* ex_secs, int* execs) : 
-		needles(ns), executed_secs(ex_secs), svc_executions(execs) {};
+	ManyLinesWorker(node_t* ns, int nsc, float* ex_secs, int* execs) : 
+		needles(ns), needles_count(nsc), executed_secs(ex_secs), svc_executions(execs) {};
 	#endif
     ~ManyLinesWorker () {};
     void * svc(void* t);
@@ -118,7 +119,7 @@ class ManyLinesWorker : public ff::ff_node {
  */
 class PrinterWorker : public ManyLinesWorker {
     public:
-    PrinterWorker(std::list<node_t> ns) : ManyLinesWorker(ns) {};
+    PrinterWorker(node_t* ns, int nsc) : ManyLinesWorker(ns, nsc) {};
     void found_node(int linenum, node_t needle);
 };
 
@@ -170,10 +171,10 @@ public:
 /* ************************** ITERATOR WORKER *****************************  */
 class IteratorWorker : public ManyLinesWorker {
 	public:
-	IteratorWorker (std::list<node_t> ns):
-		ManyLinesWorker(ns) {};
+	IteratorWorker (node_t* ns, int nsc):
+		ManyLinesWorker(ns, nsc) {};
 	#ifdef PRINT_EXEC_TIME
-	IteratorWorker (std::list<node_t> ns, float* ex_secs, int* execs) :
+	IteratorWorker (node_t* ns, float* ex_secs, int* execs) :
 		ManyLinesWorker(ns, ex_secs, execs) {};
 	#endif
 	void* svc(void* t);

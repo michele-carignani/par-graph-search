@@ -13,10 +13,10 @@ using namespace std;
 using namespace ff;
 
 /** List of nodes to look for in the graph. */
-list<node_t> needles;
+node_t* needles;
 
 int main(int argc, char** argv) {
-    int nw, g, i;
+    int nw, g, i, needles_count;
     char* graph_file_path;
     struct timespec start, end;
     #ifdef IO_TIME
@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
     ifstream graph_file;
     char buf[100];
 
-    get_conf(argc, argv, &graph_file_path, &needles, &nw, &g);
+    get_conf(argc, argv, &graph_file_path, &needles, &needles_count, &nw, &g);
 
     if(nw <= 0 || g <= 0 ) {
         cout << "Error: n-workers and granularity must be grater than 0, ";
@@ -71,10 +71,10 @@ int main(int argc, char** argv) {
     vector<ff_node *> workers;
     for(int j = 0; j < nw; j++){
 #ifndef PRINT_EXEC_TIME
-        IteratorWorker* w = new IteratorWorker (needles) ;
+        IteratorWorker* w = new IteratorWorker (needles, needles_count) ;
 #else 
         workers_execs[j] = 0; workers_times[j] = 0;
-        IteratorWorker* w = new IteratorWorker (needles, &(workers_times[j]), &(workers_execs[j])) ;
+        IteratorWorker* w = new IteratorWorker (needles, needles_count, &(workers_times[j]), &(workers_execs[j])) ;
 #endif
         
         #ifdef USE_AFFINITY

@@ -13,15 +13,15 @@
 using namespace std;
 using namespace ff;
 
-list<node_t> needles;
+node_t* needles;
 
 int main(int argc, char* argv[]){
 
-    int nw, g;
+    int nw, g, nsc;
     char* graph_file_path;
     struct timespec start, end;
 
-    get_conf(argc, argv, &graph_file_path, &needles, &nw, &g);
+    get_conf(argc, argv, &graph_file_path, &needles, &nsc, &nw, &g);
 
     if(nw <= 0 || g <= 0 ) {
         cout << "Error: n-workers and granularity must be grater than 0, ";
@@ -52,7 +52,7 @@ int main(int argc, char* argv[]){
     vector<ff_node *> workers;
     for(int j = 0; j < nw; j++){
 #ifndef PRINT_EXEC_TIME
-        ManyLinesWorker* w = new ManyLinesWorker (needles) ;
+        ManyLinesWorker* w = new ManyLinesWorker (needles, nsc) ;
 #else 
         workers_execs[j] = 0; workers_times[j] = 0;
         ManyLinesWorker* w = new ManyLinesWorker (needles, &(workers_times[j]), &(workers_execs[j])) ;

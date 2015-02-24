@@ -16,7 +16,7 @@
 using namespace std;
 using namespace ff;
 
-list<node_t> needles;
+node_t* needles;
 list<string> results;
 list<string>* local_results;
 
@@ -30,9 +30,9 @@ int main(int argc, char** argv){
     #endif
     char* graph_filename;
     char buf[100];
-    int nw, g, file_length;
+    int nw, g, file_length, nsc;
 
-    get_conf(argc, argv, &graph_filename, &needles, &nw, &g);
+    get_conf(argc, argv, &graph_filename, &needles, &nsc, &nw, &g);
     
     local_results = new list<string>[nw];
     
@@ -52,11 +52,11 @@ int main(int argc, char** argv){
     clock_gettime(CLOCK_REALTIME, &end_io);
     #endif
 
-    auto workerF = [&edgelist](const int start, const int end, const int thid ){
+    auto workerF = [&edgelist, &nsc](const int start, const int end, const int thid ){
         if (start == end) return;
         list<string>* my_local_results = &(local_results[thid]);
         for(int k = start; k < end; k++){
-            pair<node_t, node_t> res = parse_and_check_line(edgelist[k], &needles);
+            pair<node_t, node_t> res = parse_and_check_line(edgelist[k], needles, nsc);
             if(!res.first.is_null()){ list_found_node(my_local_results, k+1, res.first); }
             if(!res.second.is_null()){ list_found_node(my_local_results, k+1, res.second); }
         }
