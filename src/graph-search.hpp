@@ -77,6 +77,10 @@ typedef struct str_node_struct {
 		strncpy(sval, s.c_str(), MAX_NODE_LENGTH);
 	}
 	
+	str_node_struct(int n){
+		snprintf(sval,MAX_NODE_LENGTH, "%ul", n );
+	}
+	
 	bool operator==(str_node_struct n1){
 		int i = 0;
 		do {
