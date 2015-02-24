@@ -54,6 +54,7 @@ echo "Edges; Needles; Granularity; Program; 1; 2; 4; 8; 16; 32; 64"
 
 for d in $DATASETS; do
 for n in $NEEDLES; do
+$BUILD_DIR/profile none $2.$n
 seqRes=$( test_sequential "$1.$d" "$2.$n" )
 seqRecordTail="seq "
 for nw in $PAR_DEGS ; do

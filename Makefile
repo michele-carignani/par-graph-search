@@ -40,6 +40,9 @@ nodes-mic: src/nodes.hpp src/nodes.cpp src/graph-search.hpp
 seq-mic: utils-mic src/seq.cpp
 	$(ICC) $(I_VARS) src/$(subst -mic,,$@).cpp src/mic/utils.o -o build/mic/$(subst -mic,,$@) -lrt
 
+seq-no-io-mic: utils-mic src/seq-no-io.cpp
+	$(ICC) $(I_VARS) src/$(subst -mic,,$@).cpp src/utils.o -o build/$(subst -mic,,$@) -lrt
+
 farm-mic : nodes-mic utils-mic src/farm.cpp
 	$(ICC) $(I_VARS) -I$(FF_ROOT) src/$(subst -mic,,$@).cpp src/mic/utils.o src/mic/nodes.o -o build/mic/$(subst -mic,,$@) -lpthread -lrt
 	
@@ -49,9 +52,15 @@ farm-no-io-mic : nodes-mic utils-mic src/farm-no-io.cpp
 map-mic: utils-mic src/map.cpp
 	$(ICC) $(I_VARS) -I$(FF_ROOT) src/$(subst -mic,,$@).cpp src/mic/utils.o -o build/mic/$(subst -mic,,$@) -lpthread -lrt
 
-all: seq seq-no-io farm map farm-no-io
+all: seq seq-no-io farm map farm-no-io profile
 
-all-mic: seq-mic farm-mic map-mic farm-no-io-mic
+all-mic: seq-mic seq-no-io-mic farm-mic map-mic farm-no-io-mic profile-mic
+
+profile: utils
+	$(CXX) $(C_VARS) src/profile.cpp src/utils.o -o build/profile -lrt
+
+profile-mic: utils-mic
+	$(ICC) $(I_VARS) src/profile.cpp src/mic/utils.o -o build/mic/profile -lrt
 
 doxy:
 	doxygen docs/doxy.conf

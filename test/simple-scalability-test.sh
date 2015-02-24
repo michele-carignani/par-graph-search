@@ -57,6 +57,8 @@ if [ ! -f "$2" ] ; then
 	exit -1
 fi
 
+$BUILD_DIR/profile none $2
+echo
 echo "Program; 1; 2; 4; 8; 16; 32; 64; 128; 238"
 
 # Test the sequential version and print it many times

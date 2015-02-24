@@ -7,55 +7,55 @@
 #include <time.h>
 #include <iostream>
 #include "utils.hpp"
+#include "graph-search.hpp"
 #include <random>
 
 using namespace std;
 
 #define ITER 50000
-#define MAX_NEEDLES 100
 
 /*
  * 
  */
 int main(int argc, char** argv) {
 
-    string line = "50983\t820394\r\n";
-    string needle = "50983";
-    
+    cout << " --- " << endl;
+    printf("Sizeof(node_t): %lu bytes\n", sizeof(node_t));
+        
     struct timespec start_r, start_cpu, end_r, end_cpu;
-    float realtimes[MAX_NEEDLES], cputimes[MAX_NEEDLES]; 
-    single_task_t task(line, 1);
-    list<string> needles;
-    needles.push_back(needle);
-    int new_needle;
-    list<string> results;
+    float realtime, cputime; 
+    node_t* needles;
+    int nsc;
+    string task = "50123\t12314\r\n";
+    char* ctask = (char*) task.c_str();
     
-    for(int j = 0; j < MAX_NEEDLES; j++){
-        needles.push_back(std::to_string(rand()));
+    load_needles_list(argc, argv, &needles, &nsc);
+    // list<string> results;
         
-        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start_cpu);
-        clock_gettime(CLOCK_REALTIME, &start_r);
-        
-        for(int i = 0; i < ITER; i++){
-            parse_and_check_line(task, needles, &results);
-        }
-        
-        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end_cpu);
-        clock_gettime(CLOCK_REALTIME, &end_r);
-        
-        realtimes[j] = elapsed_time_nsecs(start_r, end_r);
-        cputimes[j] = elapsed_time_nsecs(start_cpu, end_cpu);
+    cout << "# Needles: "<< nsc << endl;
+    cout << "Sizeof(needles): " << (sizeof(node_t) * nsc  ) << " bytes" << endl;
+    
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start_cpu);
+    clock_gettime(CLOCK_REALTIME, &start_r);
+    
+    for(int i = 0; i < ITER; i++){
+        // char* ctaskp = strdup(ctask);
+        parse_and_check_line(ctask, needles, nsc);
+        ctask[5] = '\t';
+    }
 
-    }
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end_cpu);
+    clock_gettime(CLOCK_REALTIME, &end_r);
+
+    realtime= elapsed_time_nsecs(start_r, end_r);
+    cputime = elapsed_time_nsecs(start_cpu, end_cpu);
     
-    cout << "## Tempo medio di esecuzione di parse_and_check_line() per 1 needle\n";
-    cout << "Needles; Realtime; Cputime\n";
+    cout << "## Tempo medio di esecuzione di parse_and_check_line()";
+    cout << " sulla lista di needles data (in media su " << ITER << " esecuzioni)" << endl;
     
-    for(int j = 0; j < MAX_NEEDLES; j++){
-        cout <<  (j+1) << "; " << realtimes[j] / (ITER * (j+1));
-        cout << "; " << cputimes[j] / (ITER * (j+1)) << "\n";
-    }
-    
+    cout << "Realtime " << realtime / ITER << " nsecs" << endl;
+    cout << "Cputime " << cputime / ITER<< " nsecs" << endl;
+    cout << "-- "<< endl << endl;
     return 0;
 }
 
