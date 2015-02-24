@@ -102,10 +102,18 @@ class ManyLinesWorker : public ff::ff_node {
 #endif
     
     public:
-    ManyLinesWorker (node_t* ns, int nsc) : needles(ns), needles_count(nsc) {};
+    ManyLinesWorker (node_t* ns, int nsc) {
+		needles_count = nsc;
+		needles = (node_t*) malloc(sizeof(node_t) * nsc);
+		memcpy(needles, ns, sizeof(node_t) * nsc);
+	};
 	#ifdef PRINT_EXEC_TIME
 	ManyLinesWorker(node_t* ns, int nsc, float* ex_secs, int* execs) : 
-		needles(ns), needles_count(nsc), executed_secs(ex_secs), svc_executions(execs) {};
+		executed_secs(ex_secs), svc_executions(execs) {
+		needles_count = nsc;
+		needles = (node_t*) malloc(sizeof(node_t) * nsc);
+		memcpy(needles, ns, sizeof(node_t) * nsc);
+	};
 	#endif
     ~ManyLinesWorker () {};
     void * svc(void* t);
