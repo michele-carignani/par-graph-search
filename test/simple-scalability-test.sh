@@ -27,6 +27,10 @@ test_sequential(){
     $BUILD_DIR/seq $1 $2 2>&1
 }
 
+test_sequential(){ 
+    $BUILD_DIR/seq $1 $2 2>&1
+}
+
 usage(){
     echo -e "Usage: $0 <graph_file_basename> <nodes_file_basename>\n"
 }
@@ -53,7 +57,7 @@ if [ ! -f "$2" ] ; then
 	exit -1
 fi
 
-echo "Program; 1; 2; 4; 8; 16; 32; 64"
+echo "Program; 1; 2; 4; 8; 16; 32; 64; 128; 238"
 
 # Test the sequential version and print it many times
 seqRes=$( test_sequential "$1" "$2" )

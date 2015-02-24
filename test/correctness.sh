@@ -27,14 +27,14 @@ for b in $BINS ; do
 	sort $tmpfile > $tmpfile.sorted
 	diff $sorted_res $tmpfile.sorted > /dev/null 
 	if [ $? -ne 0 ] ; then
-		echo "$b : fail"
+		echo -e "$b : fail"
 		echo "-- EXPECTED : --"
 		cat $sorted_res
 		echo "-- RECEIVED : --"
 		cat $tmpfile.sorted
-		echo "-- --"
+		echo "-- --\n"
 	else
-		echo "$b : success"
+		echo -e "$b : success\n"
 	fi
 	rm -f $tmpfile $tmpfile.sorted
 done

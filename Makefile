@@ -79,3 +79,6 @@ tests-scale-mic:
 	@echo -e "\nRunning test!"
 	@ssh mic0 "cd $(MIC_PREFIX_DIR); bash test/scalability-test.sh data/$(DATASET) data/$(NEEDLES_FILE) > TEST_SCALE_RESULTS &"
 	@echo -e "Test running. Results in the TEST_SCALE_RESULTS file"
+
+test-correctness:
+	@./test/correctness.sh data/fake-graph.txt{,.needles,.result}
