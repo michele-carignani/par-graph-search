@@ -32,7 +32,7 @@ for b in $BINS ; do
 		cat $sorted_res
 		echo "-- RECEIVED : --"
 		cat $tmpfile.sorted
-		echo "-- --\n"
+		echo -e "-- --\n"
 	else
 		echo -e "$b : success\n"
 	fi
