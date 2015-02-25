@@ -27,8 +27,8 @@ test_sequential(){
     $BUILD_DIR/seq $1 $2 2>&1
 }
 
-test_sequential(){ 
-    $BUILD_DIR/seq $1 $2 2>&1
+test_sequential_no_io(){ 
+    $BUILD_DIR/seq-no-io $1 $2 2>&1
 }
 
 usage(){
@@ -64,6 +64,14 @@ echo "Program; 1; 2; 4; 8; 16; 32; 64; 128; 238"
 # Test the sequential version and print it many times
 seqRes=$( test_sequential "$1" "$2" )
 seqRecordTail="seq "
+for nw in $PAR_DEGS ; do
+    seqRecordTail="$seqRecordTail; $seqRes"
+done
+echo $seqRecordTail
+
+# Test the sequential no IO version and print it many times
+seqRes=$( test_sequential_no_io "$1" "$2" )
+seqRecordTail="seq-no-io "
 for nw in $PAR_DEGS ; do
     seqRecordTail="$seqRecordTail; $seqRes"
 done
