@@ -11,7 +11,7 @@
 #include <vector>
 #include <time.h>
 
-#define DEFAULT_GRANULARITY 20
+#define DEFAULT_GRANULARITY 300
 #define DEFAULT_WORKERS_NUM 2
 
 // todo controllare lunghezza parola
@@ -145,7 +145,7 @@ typedef struct multi_lines_task {
     single_task_t* lines; /** The edges assigned to the task */
     
     multi_lines_task(int s){
-		size = size;
+		size = s;
 		count = 0;
         lines = new single_task_t[s];
     };    
