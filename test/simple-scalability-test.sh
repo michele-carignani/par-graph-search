@@ -12,8 +12,6 @@
 BUILD_DIR=./build
 BINS="farm map farm-no-io"
 
-PAR_DEGS="1 2 4 8 16 32 64 128 238"
-
 DEFAULT_GRANULARITY=100
 
 DATASETS="100 10000 1M 7M"
@@ -32,7 +30,7 @@ test_sequential_no_io(){
 }
 
 usage(){
-    echo -e "Usage: $0 <graph_file_basename> <nodes_file_basename>\n"
+    echo -e "Usage: $0 <graph_file_basename> <nodes_file_basename> [<on_phi>]\n"
 }
 
 if [ $# -lt 2 ] ; then
@@ -40,12 +38,22 @@ if [ $# -lt 2 ] ; then
     exit 0
 fi
 
+if [ $3 = '1' ] ; then
+	PAR_DEGS="1 2 4 8 16 32 64 128 238"
+	header="Program; 1; 2; 4; 8; 16; 32; 64; 128; 238"
+else
+	PAR_DEGS="1 2 4 8 16"
+	header="Program; 1; 2; 4; 8; 16"
+fi
+
 echo "# Completion times in seconds of the different parallel and sequential versions"
 echo "# using parallelism degree."
 echo "# First line describes the format of the CSV records (semicolon separated)."
 echo 
 echo "# Arguments: $1 $2"
-echo
+echo -e "\tNumero di righe:"
+echo -e "\t"$(wc -l $1)
+echo -e "\t"$(wc -l $2)
 
 if [ ! -f "$1" ] ; then
 	echo -e "Cannot find dataset $1"
@@ -59,7 +67,7 @@ fi
 
 $BUILD_DIR/profile none $2
 echo
-echo "Program; 1; 2; 4; 8; 16; 32; 64; 128; 238"
+echo $header
 
 # Test the sequential version and print it many times
 seqRes=$( test_sequential "$1" "$2" )
