@@ -179,10 +179,12 @@ public:
 /* ************************** ITERATOR WORKER *****************************  */
 class IteratorWorker : public ManyLinesWorker {
 	public:
-	IteratorWorker (node_t* ns, int nsc):
-		ManyLinesWorker(ns, nsc) {};
+	std::vector<char*>* graph;
+	IteratorWorker (std::vector<char*>* gr, node_t* ns, int nsc):
+		graph(gr), ManyLinesWorker(ns, nsc) {};
 	#ifdef PRINT_EXEC_TIME
-	IteratorWorker (node_t* ns, float* ex_secs, int* execs) :
+	IteratorWorker (std::vector<char*>* gr, node_t* ns, int nsc, float* ex_secs, int* execs) :
+	graph(gr)
 		ManyLinesWorker(ns, ex_secs, execs) {};
 	#endif
 	void* svc(void* t);

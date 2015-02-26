@@ -212,14 +212,12 @@ void* IteratorEmitter::svc(void* t){
         last  = graph->size();
         finish = true;
     }
-    
-#ifdef ON_MIC
-    it_task_t* tskbuf = (it_task_t*) __mm_alloc(sizeof(it_task_t), 64);
-#else
-    it_task_t* tskbuf = (it_task_t*) malloc(sizeof(it_task_t));
-#endif
-    it_task_t* tsk = new (tskbuf) it_task_t(graph, curr, last);
-    ff_send_out(tsk);
+   
+    long tsk = embed_ints(curr, last);
+    assert(tsk != 0);
+    assert(tsk != (long) GO_ON);
+    assert(tsk != (long) EOS);
+    ff_send_out((void*) tsk);
     curr = last;
     
     if(finish){
@@ -238,7 +236,8 @@ void* IteratorEmitter::svc(void* t){
 
 void* IteratorWorker::svc(void* t){
     pair<node_t,node_t> found;
-    it_task_t* task = (it_task_t*) t;
+    int task_start = split_first((long) t);
+    int task_end = split_second((long) t);
     
     #ifdef PRINT_EXEC_TIME
     struct timespec start, end;
@@ -246,8 +245,8 @@ void* IteratorWorker::svc(void* t){
     *svc_executions = *svc_executions + 1;
     #endif
     
-    for(unsigned int k = task->start; k < task->end; k++){
-        found = parse_and_check_line( (*(task->graph))[k], needles, needles_count);
+    for(int k = task_start; k < task_end; k++){
+        found = parse_and_check_line( (*graph)[k], needles, needles_count);
     
         if(!found.first.is_null()){
             pair<node_t,int>* res =  new pair<node_t,int>(found.second, k+1);
@@ -260,8 +259,6 @@ void* IteratorWorker::svc(void* t){
         }
     
     }
-    
-    delete task;
     
     #ifdef PRINT_EXEC_TIME
     clock_gettime(CLOCK_REALTIME, &end);

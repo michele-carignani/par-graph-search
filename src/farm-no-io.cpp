@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
     vector<ff_node *> workers;
     for(int j = 0; j < nw; j++){
 #ifndef PRINT_EXEC_TIME
-        IteratorWorker* w = new IteratorWorker (needles, needles_count) ;
+        IteratorWorker* w = new IteratorWorker (&edgelist, needles, needles_count) ;
 #else 
         workers_execs[j] = 0; workers_times[j] = 0;
         IteratorWorker* w = new IteratorWorker (needles, needles_count, &(workers_times[j]), &(workers_execs[j])) ;
