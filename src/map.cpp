@@ -17,13 +17,12 @@ using namespace std;
 using namespace ff;
 
 node_t* needles;
-list<string> results;
-list<string>* local_results;
 
 int main(int argc, char** argv){
     
     vector<char*> edgelist;
     ifstream graph_file;
+    list<string> results;
     struct timespec start, end;
     #ifdef IO_TIME
     struct timespec end_io;
@@ -33,8 +32,6 @@ int main(int argc, char** argv){
     int nw, g, file_length, nsc;
 
     get_conf(argc, argv, &graph_filename, &needles, &nsc, &nw, &g);
-    
-    local_results = new list<string>[nw];
     
     graph_file.open(graph_filename);
 
@@ -52,28 +49,36 @@ int main(int argc, char** argv){
     clock_gettime(CLOCK_REALTIME, &end_io);
     #endif
 
-    auto workerF = [&edgelist, &nsc](const int start, const int end, const int thid ){
+    auto workerF = [&edgelist, &nsc](const int start, const int end, 
+            const int thid, ff_buffernode &node ){
         if (start == end) return;
-        list<string>* my_local_results = &(local_results[thid]);
+        list<string>* my_local_results = new list<string>;
         for(int k = start; k < end; k++){
             pair<node_t, node_t> res = parse_and_check_line(edgelist[k], needles, nsc);
             if(!res.first.is_null()){ list_found_node(my_local_results, k+1, res.first); }
             if(!res.second.is_null()){ list_found_node(my_local_results, k+1, res.second); }
+            // todo: dynamic put results
         }
+        node.put(my_local_results);
     };
     
-    ParallelFor pf(nw);
+    auto mergerF = [&results](list<string>* partial){
+        results.merge( *partial );
+        delete partial;
+    };
+    
+    // todo: controllare secondo parametro
+    ParallelForPipeReduce <list<string>*> pfpipe (nw);
+    
     if(is_set_granularity(argc)){
         // dynamic scheduling with stride g and par deg nw
-        pf.parallel_for_idx(0,file_length-1, 1, g, workerF);
+        pfpipe.parallel_reduce_idx(0,file_length-1, 1, g, workerF, mergerF);
     } else {
         // static scheduling with auto strides
-        pf.parallel_for_idx(0,file_length-1, 1, 1, workerF);
+        // grain = 0 means static scheduling
+        pfpipe.parallel_reduce_idx(0,file_length-1, 1, 0, workerF, mergerF);
     }
     
-    for(int j = 0; j < nw; j++){
-        results.merge(local_results[j]);
-    }
     clock_gettime(CLOCK_REALTIME, &end);
     
 #ifdef PRINT_RESULTS
