@@ -147,6 +147,20 @@ void print_found_node(single_task_t* t, string needle){
     cout << ((single_task_t*) t)->linenum << "\n";
 }
 
+long embed_ints(int a, int b){
+    long r = 0;
+    return (( r | a) << 32) | b;
+}
+
+int split_first(long l){
+    return (int) (l >> 32);
+}
+
+int split_second(long l){
+    l = l << 32;
+    return (int) (l >> 32);
+}
+
 /* *********************** PROFILING UTILIS ********************************* */
 
 float elapsed_time_secs(struct timespec from, struct timespec to){

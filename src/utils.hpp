@@ -37,6 +37,10 @@ void list_found_node(std::list<std::string>* res, int linenum, node_t needle);
 
 void print_found_node(single_task_t* t, std::string needle);
 
+long embed_ints(int a, int b);
+int split_first(long l);
+int split_second(long l);
+
 float elapsed_time_secs(struct timespec from, struct timespec to);
 float elapsed_time_nsecs(struct timespec from, struct timespec to);
 
