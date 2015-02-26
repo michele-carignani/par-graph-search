@@ -23,8 +23,8 @@ seq-no-io: utils src/seq-no-io.cpp
 farm : nodes utils src/farm.cpp
 	$(CXX) $(C_VARS) src/$@.cpp src/nodes.o src/utils.o -I$(FF_ROOT) -o build/$@ -lpthread -lrt
 
-map : nodes utils src/map.cpp
-	$(CXX) $(C_VARS) src/$@.cpp src/nodes.o src/utils.o -I$(FF_ROOT) -o build/$@ -lpthread -lrt
+map : utils src/map.cpp
+	$(CXX) $(C_VARS) src/$@.cpp src/utils.o -I$(FF_ROOT) -o build/$@ -lpthread -lrt
 
 farm-no-io :nodes utils src/farm-no-io.cpp
 	$(CXX) $(C_VARS) src/$@.cpp src/nodes.o src/utils.o -I$(FF_ROOT) -o build/$@ -lpthread -lrt
@@ -61,6 +61,9 @@ profile: utils
 
 profile-mic: utils-mic
 	$(ICC) $(I_VARS) src/profile.cpp src/mic/utils.o -o build/mic/profile -lrt
+
+snap-test: utils
+	$(CXX) $(C_VARS) -I$(SNAP_CORE) -I$(SNAP_GLIB) src/snap_test.cpp src/utils.o -o build/snap-test
 
 doxy:
 	doxygen docs/doxy.conf
