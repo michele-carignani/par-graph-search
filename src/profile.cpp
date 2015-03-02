@@ -25,6 +25,7 @@ int main(int argc, char** argv) {
     struct timespec start_r, start_cpu, end_r, end_cpu;
     float realtime, cputime; 
     node_t* needles;
+    list<string> results;
     int nsc;
     string task = "50123\t12314\r\n";
     char* ctask = (char*) task.c_str();
@@ -40,8 +41,15 @@ int main(int argc, char** argv) {
     
     for(int i = 0; i < ITER; i++){
         // char* ctaskp = strdup(ctask);
-        parse_and_check_line(ctask, needles, nsc);
-        ctask[5] = '\t';
+        pair<node_t,node_t> found = parse_and_check_line(ctask, needles, nsc);
+        
+        if(!found.first.is_null()){
+            list_found_node(&results , i+1, found.first);
+        }
+        if(!found.second.is_null()){
+            list_found_node(&results, i+1, found.second);
+        }
+        
     }
 
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end_cpu);

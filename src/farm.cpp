@@ -55,7 +55,7 @@ int main(int argc, char* argv[]){
         ManyLinesWorker* w = new ManyLinesWorker (needles, nsc) ;
 #else 
         workers_execs[j] = 0; workers_times[j] = 0;
-        ManyLinesWorker* w = new ManyLinesWorker (needles, &(workers_times[j]), &(workers_execs[j])) ;
+        ManyLinesWorker* w = new ManyLinesWorker (needles, nsc, &(workers_times[j]), &(workers_execs[j])) ;
 #endif
         
         #ifdef USE_AFFINITY

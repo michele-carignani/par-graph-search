@@ -170,7 +170,7 @@ public:
 	
 	#ifdef PRINT_EXEC_TIME
 	IteratorEmitter(std::vector<char*>* graph, int g, float* ex_secs, int* execs) :
-		graph(graph), granularity(g), executed_secs(ex_secs), svc_executions(execs) {};
+		curr(0),  graph(graph), granularity(g), executed_secs(ex_secs), svc_executions(execs) {};
 	#endif
 		
 	void* svc(void* t);
@@ -181,11 +181,10 @@ class IteratorWorker : public ManyLinesWorker {
 	public:
 	std::vector<char*>* graph;
 	IteratorWorker (std::vector<char*>* gr, node_t* ns, int nsc):
-		graph(gr), ManyLinesWorker(ns, nsc) {};
+		ManyLinesWorker(ns, nsc), graph(gr) {};
 	#ifdef PRINT_EXEC_TIME
 	IteratorWorker (std::vector<char*>* gr, node_t* ns, int nsc, float* ex_secs, int* execs) :
-	graph(gr)
-		ManyLinesWorker(ns, ex_secs, execs) {};
+		ManyLinesWorker(ns, nsc, ex_secs, execs), graph(gr) {};
 	#endif
 	void* svc(void* t);
 	

@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
         IteratorWorker* w = new IteratorWorker (&edgelist, needles, needles_count) ;
 #else 
         workers_execs[j] = 0; workers_times[j] = 0;
-        IteratorWorker* w = new IteratorWorker (needles, needles_count, &(workers_times[j]), &(workers_execs[j])) ;
+        IteratorWorker* w = new IteratorWorker (&edgelist, needles, needles_count, &(workers_times[j]), &(workers_execs[j])) ;
 #endif
         
         #ifdef USE_AFFINITY
@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
     }
     
     ff_farm<> graph_search_farm (workers, &em, &col);
-
+    
     clock_gettime(CLOCK_REALTIME, &start);
     if(graph_search_farm.run_and_wait_end()<0) error("running farm");    
     clock_gettime(CLOCK_REALTIME, &end);    
