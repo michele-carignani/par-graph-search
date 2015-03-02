@@ -117,7 +117,8 @@ pair<node_t, node_t> parse_and_check_line(char* line, node_t* needles, int needl
     
     if(*line == '#') return result;
     
-    node_t fir (strsep(&line, "\t"));
+    char* sourcep = strsep(&line, "\t");
+    node_t fir (sourcep);
     node_t sec (line);
     
     for(int it = 0; it != needles_count; it++){
@@ -128,6 +129,9 @@ pair<node_t, node_t> parse_and_check_line(char* line, node_t* needles, int needl
             result.second = needles[it];
         }
     }
+    // ripristina la stringa come all'inizio
+    *(line - 1) = '\t';
+    
     return result;
 }
 
