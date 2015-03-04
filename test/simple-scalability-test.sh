@@ -12,7 +12,7 @@
 BUILD_DIR=./build
 BINS="farm map farm-no-io"
 
-DEFAULT_GRANULARITY=100
+DEFAULT_GRANULARITY=30000
 
 DATASETS="100 10000 1M 7M"
 NEEDLES="2 100 250"
@@ -29,6 +29,10 @@ test_sequential_no_io(){
     $BUILD_DIR/seq-no-io $1 $2 2>&1
 }
 
+test_grep_version(){
+	time grep -f $2 $1 > 
+}
+
 usage(){
     echo -e "Usage: $0 <graph_file_basename> <nodes_file_basename> [<on_phi>]\n"
 }
@@ -43,7 +47,7 @@ if [ $3 = '1' ] ; then
 	header="Program; 1; 2; 4; 8; 16; 32; 64; 128; 238"
 else
 	PAR_DEGS="1 2 4 8 16"
-	header="Program; 1; 2; 4; 8; 16"
+	header="Program; 1; 2; 4; 8; 14"
 fi
 
 echo "# Completion times in seconds of the different parallel and sequential versions"

@@ -42,9 +42,9 @@ void load_needles_list(int argc, char** argv, node_t** needles, int* needles_cou
     char buf[50];
     needles_file.getline(buf, 50);
     vector<node_t> nl;
-    while(needles_file /*.gcount() != 0*/){
+    while(needles_file){
       nl.push_back(node_t(buf));
-      needles_file.getline(buf, 50);   
+      needles_file.getline(buf, 50);
     }
     
 #ifdef ON_MIC
@@ -87,37 +87,18 @@ void get_conf(int argc, char** argv, char** gf, node_t** ns, int* needles_count,
 
 /* ********************** GRAPH SEARCH LOGIC ******************************* */
 
-pair<node_t,node_t> parse_and_check_line(string* line, list<node_t>* needles){
-    
-    pair<node_t,node_t> result;
-    
-    if((*line)[0] == '#') return result;
-    
-    node_t first = node_t(line->substr(0, line->find("\t")));
-    node_t second = node_t(line->substr(
-            line->find("\t") + 1, 
-            line->find("\r") - 1 - line->find("\t")
-     ));
-    
-    list<node_t>::iterator it;
-    
-    for(it = needles->begin(); it != needles->end(); it++){
-        if( *it == first ){
-            result.first = *it;
-        }
-        if( *it == second ){
-            result.second = *it;
-        }
-    }
-    return result;
-}
-
 pair<node_t, node_t> parse_and_check_line(char* line, node_t* needles, int needles_count){
     pair<node_t, node_t> result;
     
-    if(*line == '#') return result;
+     // cout << "Init pacl, ";
+    
+    if(*line == '#' ) { return result; }
+    if(line == NULL || *line == '\0') {  return result; }
     
     char* sourcep = strsep(&line, "\t");
+    
+    if(line == NULL) { return result; }
+    
     node_t fir (sourcep);
     node_t sec (line);
     
@@ -129,6 +110,7 @@ pair<node_t, node_t> parse_and_check_line(char* line, node_t* needles, int needl
             result.second = needles[it];
         }
     }
+    
     // ripristina la stringa come all'inizio
     *(line - 1) = '\t';
     
@@ -192,13 +174,3 @@ float elapsed_time_nsecs(struct timespec from, struct timespec to){
     float r = (float) secs + (float) nsecs;
     return r;
 }
-
-/*
-float profile_func(std::function<void()> func, clockid_t clock = CLOCK_REALTIME) {
-    struct timespec start, end;
-    clock_gettime(clock, &start);
-    func();
-    clock_gettime(clock, &end);
-    return elapsed_time_secs(start,end);
-}
- * */

@@ -48,43 +48,6 @@ class ManyLinesEmitter : public ff::ff_node {
 
 };
 
-/**
- *  A class describing an emitter node that takes
- *  the input data from a vector of strings (without performing
- *  IO operations).
- */
-class EmitterNoIO : public ff::ff_node {
-    private:
-        unsigned int linenum;
-        
-	protected:
-		std::vector<char*>* graph;
-		int granularity;
-		#ifdef PRINT_EXEC_TIME
-        float* executed_secs;
-		int* svc_executions;
-		#endif
-		
-    public:
-        /**
-         * 
-         * @param graph Vector of lines of the edgelist file
-         * @param g Size of the multi_task_t task
-         */
-        EmitterNoIO(std::vector<char*>* graph, int g = 20):
-            linenum(0), graph(graph), granularity(g){};
-		
-		#ifdef PRINT_EXEC_TIME
-		EmitterNoIO(std::vector<char*>* graph, int g, float* ex_secs, int* execs) : 
-			linenum(0), graph(graph), granularity(g),
-			executed_secs(ex_secs), svc_executions(execs) {};
-		#endif
-            
-        ~EmitterNoIO() {};
-        void* svc(void * t);
-        void svc_end();
-};
-
 /* **************************** MANY LINES WORKER *************************** */
 
 /** 

@@ -5,12 +5,14 @@
 #ifndef _GRAPH_SEARCH_HPP
 #define _GRAPH_SEARCH_HPP
 
-#include <string>
 #include <cstring>
+#include <cstdlib>
+#include <string>
 #include <list>
 #include <vector>
 #include <time.h>
 
+// todo: dynamic default_granularity
 #define DEFAULT_GRANULARITY 300
 #define DEFAULT_WORKERS_NUM 2
 
@@ -29,7 +31,7 @@ typedef struct int_node_struct {
 	
 	int_node_struct(unsigned int n) : nval(n) {};
 	int_node_struct(char* s)  { nval = atoi(s); }; 
-	int_node_struct(std::string s)  { nval = std::stoi(s); }; 
+	int_node_struct(std::string s)  { nval = atoi(s.c_str()); }; 
 	int_node_struct() { nval = 0; }
 	
 	bool operator==(int_node_struct n1){
@@ -113,6 +115,9 @@ typedef int_node_t node_t;
 typedef str_node_t node_t;
 #endif
 
+// todo
+// alignement
+
 /** 
 *    A single task for parallel graph search.
 *    Represents an edge i.e. a line of the graph
@@ -130,6 +135,9 @@ typedef struct single_line_task {
     int linenum; /** The position in the graph file */
 } single_task_t;
 
+// todo:
+// merge the two structures
+// alignement
 
 /**
 *   A task composed of many edges (represented as
@@ -156,7 +164,8 @@ typedef struct multi_lines_task {
 
     void add_task(char* line, int num){
         lines[count].linenum = num;
-        lines[count].line = line;
+		// todo passare a memoria statica, allineare
+        lines[count].line = strdup(line);
         count++;
     }
 
@@ -166,42 +175,5 @@ typedef struct multi_lines_task {
     
 } multi_task_t;
 
-/** 
-*   \deprecated
-*   Represents a portion of the edgelist
-*   file, in particular contains len lines.
-*/
-typedef struct string_task {
-    // First character of chunk
-    char* start;
-
-    // Number of characters before last \n
-    int len;
-public:
-    string_task(char* s, int l): start(s), len(l) {};
-} string_task_t;
-
-
-/**
-*   \deprecated
-*   Describes a portion of the edgelist
-*   as an array of bytes. It is then parsed to find
-*   newlines characters.
-*/
-typedef struct bytes_task {
-    int start;
-    int size;
-
-public:
-    bytes_task(int st, int si): start(st), size(si) {};
-} bytes_task_t;
-
-typedef struct iterator_task {
-	std::vector<char*>* graph;
-	unsigned int start;
-	unsigned int end;
-	iterator_task(std::vector<char*>* g, int s,int e) :
-		graph(g), start(s), end(e) {};
-} it_task_t ;
 
 #endif

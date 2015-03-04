@@ -2,6 +2,7 @@
 *	\author: Michele Carignani <michele.carignani@gmail.com>
 */
 #include <vector>
+#include <iostream>
 #include "graph-search.hpp"
 #include "nodes.hpp"
 #include "utils.hpp"
@@ -15,7 +16,6 @@ using namespace ff;
 /* Constructor  */
 ManyLinesEmitter::ManyLinesEmitter(char* pathname, int g){
     linenum = 0;
-    granularity = 20; 
     graph_file.open(pathname);
     if(!graph_file){
         error("Opening graph file");
@@ -38,7 +38,8 @@ ManyLinesEmitter::ManyLinesEmitter(char* pathname, int g, float* ex_secs, int* e
 /* Looping function */
 void* ManyLinesEmitter::svc(void * t){
     int i = 0;
-    char* s = new char[100];
+    char s[100];
+    s[0] = '\0';
     
 #ifdef PRINT_EXEC_TIME
     /* Track execution time and excutions number */
@@ -52,8 +53,7 @@ void* ManyLinesEmitter::svc(void * t){
     multi_task_t* tsk = new multi_task_t(granularity);
     
     graph_file.getline(s, 100);
-    cout << "LETTO: " << s << "\n";
-    while(graph_file.gcount() != 0 && i < granularity){
+    while( ( ! graph_file.gcount() == 0) && i < granularity){
         linenum++;
         tsk->add_task(s, linenum);
         graph_file.getline(s, 100);
@@ -63,53 +63,17 @@ void* ManyLinesEmitter::svc(void * t){
     /* Graph file is finished */
     if(i == 0 ) return EOS;
     
+    // cout << "send task of length " << tsk->get_count() << endl;
     ff_send_out(tsk);
-    delete[] s;
+
+    // delete[] s;
+    
 #ifdef PRINT_EXEC_TIME
     clock_gettime(CLOCK_REALTIME, &end);
     *executed_secs += elapsed_time_secs(start, end);
 #endif
     if(i < granularity){
         return EOS;
-    }
-    
-    return GO_ON;
-}
-
-/* ****************************   EMITTER-NO-IO *************************     */
-void EmitterNoIO::svc_end(){
-
-}
-
-void* EmitterNoIO::svc(void* t){
-#ifdef PRINT_EXEC_TIME
-    struct timespec start, end;
-    clock_gettime(CLOCK_REALTIME, &start);
-    *svc_executions = *svc_executions + 1;
-#endif
-    
-    int i = 0;
-    
-    multi_task_t* tsk = new multi_task_t(granularity);
-    while(linenum < graph->size() && i < granularity){
-       linenum++;
-       tsk->add_task(strdup((*graph)[linenum - 1]), linenum);
-       i++;
-    }
-    
-    if(i == 0 ) {
-        delete tsk;
-        return EOS;
-    }
-    
-    ff_send_out(tsk);
-    #ifdef PRINT_EXEC_TIME
-    clock_gettime(CLOCK_REALTIME, &end);
-    *executed_secs += elapsed_time_secs(start, end);
-    #endif
-    
-    if(i < granularity){
-       return EOS;
     }
     
     return GO_ON;
@@ -128,16 +92,18 @@ void* ManyLinesWorker::svc(void* t){
 
     multi_task_t* task = (multi_task_t*) t;
     for(int i = 0; i < task->get_count(); i++){
-        single_task_t cur = task->lines[i];
-        found = parse_and_check_line(cur.line, needles, needles_count);
+
+        single_task_t* cur = &(task->lines[i]);      
+        
+        found = parse_and_check_line(cur->line, needles, needles_count);
         
         if(!found.first.is_null()){
-            pair<node_t,int>* res =  new pair<node_t,int>(found.second, cur.linenum);
+            pair<node_t,int>* res =  new pair<node_t,int>(found.first, cur->linenum);
             ff_send_out(res);
         }
         
         if(!found.second.is_null()){
-            pair<node_t,int>* res =  new pair<node_t,int>(found.second, cur.linenum);
+            pair<node_t,int>* res =  new pair<node_t,int>(found.second, cur->linenum);
             ff_send_out(res);
         }
     }
@@ -249,7 +215,7 @@ void* IteratorWorker::svc(void* t){
         found = parse_and_check_line( (*graph)[k], needles, needles_count);
     
         if(!found.first.is_null()){
-            pair<node_t,int>* res =  new pair<node_t,int>(found.second, k+1);
+            pair<node_t,int>* res =  new pair<node_t,int>(found.first, k+1);
             ff_send_out(res);
         }
 
