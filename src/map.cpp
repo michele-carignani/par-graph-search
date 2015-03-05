@@ -70,7 +70,7 @@ int main(int argc, char** argv){
     // todo: controllare secondo parametro
     ParallelForPipeReduce <list<string>*> pfpipe (nw);
     
-    if(is_set_granularity(argc)){
+    if(is_set_granularity(argc) && g < file_length-1 ) {
         // dynamic scheduling with stride g and par deg nw
         pfpipe.parallel_reduce_idx(0,file_length-1, 1, g, workerF, mergerF);
     } else {
