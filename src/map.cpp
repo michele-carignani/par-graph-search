@@ -1,6 +1,7 @@
 /** \file: map.cpp
 *	\author Michele Carignani michele.carignani@gmail.com
 */
+#define HAS_CXX11_VARIADIC_TEMPLATES 1
 
 #include <ff/parallel_for.hpp>
 #include <fstream>
@@ -51,13 +52,19 @@ int main(int argc, char** argv){
 
     auto workerF = [&edgelist, &nsc](const int start, const int end, 
             const int thid, ff_buffernode &node ){
+        int i = 0;
         if (start == end) return;
         list<string>* my_local_results = new list<string>;
         for(int k = start; k < end; k++){
+            i++;
             pair<node_t, node_t> res = parse_and_check_line(edgelist[k], needles, nsc);
             if(!res.first.is_null()){ list_found_node(my_local_results, k+1, res.first); }
             if(!res.second.is_null()){ list_found_node(my_local_results, k+1, res.second); }
-            // todo: dynamic put results
+            if( i > 50){
+                node.put(my_local_results);
+                my_local_results = new list<string>;
+                i = 0;
+            }
         }
         node.put(my_local_results);
     };
@@ -69,7 +76,6 @@ int main(int argc, char** argv){
     
     // todo: controllare secondo parametro
     ParallelForPipeReduce <list<string>*> pfpipe (nw);
-    
     if(is_set_granularity(argc) && g < file_length-1 ) {
         // dynamic scheduling with stride g and par deg nw
         pfpipe.parallel_reduce_idx(0,file_length-1, 1, g, workerF, mergerF);
