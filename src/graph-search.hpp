@@ -17,7 +17,7 @@
 #define DEFAULT_WORKERS_NUM 2
 
 // todo controllare lunghezza parola
-#define MAX_NODE_LENGTH 50
+#define MAX_NODE_LENGTH 64
 
 /* ************************* INT_NODE_T ************************************* */
 
@@ -84,12 +84,14 @@ typedef struct str_node_struct {
 	}
 	
 	bool operator==(str_node_struct n1){
-		int i = 0;
-		do {
-			if(n1.sval[i] != this->sval[i]) return false;
-			i++;
-		} while(this->sval[i] != '\0');
-		return true;
+		int r = 0;
+#ifdef VEC_STR_EQ
+#pragma ivdep
+#else
+#pragma novec
+#endif
+		for(int i = 0; i < MAX_NODE_LENGTH; i++) r += n1.sval[i] - this->sval[i];
+		return r == 0;
 	}
 	
 	void operator=(str_node_struct n1){
