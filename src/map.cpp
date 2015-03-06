@@ -14,6 +14,8 @@
 #include "graph-search.hpp"
 #include "utils.hpp"
 
+#define DEFAULT_REDUCTION 50
+
 using namespace std;
 using namespace ff;
 
@@ -30,9 +32,25 @@ int main(int argc, char** argv){
     #endif
     char* graph_filename;
     char buf[100];
-    int nw, g, file_length, nsc;
+    int nw, g, file_length, nsc, reduction;
 
     get_conf(argc, argv, &graph_filename, &needles, &nsc, &nw, &g);
+    
+    if(argc > 5){
+        reduction = atoi(argv[5]);
+        if(reduction <= 0){
+            cerr << "Error: reduction must be a positive number, given" << reduction << endl;
+            usage(argc, argv);
+            cout << "<reduction>" << endl;
+            exit(EXIT_FAILURE);
+        }
+    } else {
+        reduction = DEFAULT_REDUCTION;
+    }
+    
+    if(g != 0 && reduction > g){
+        reduction = g;
+    }
     
     graph_file.open(graph_filename);
 
@@ -50,7 +68,7 @@ int main(int argc, char** argv){
     clock_gettime(CLOCK_REALTIME, &end_io);
     #endif
 
-    auto workerF = [&edgelist, &nsc](const int start, const int end, 
+    auto workerF = [&edgelist, &nsc, &reduction](const int start, const int end, 
             const int thid, ff_buffernode &node ){
         int i = 0;
         if (start == end) return;
@@ -60,7 +78,7 @@ int main(int argc, char** argv){
             pair<node_t, node_t> res = parse_and_check_line(edgelist[k], needles, nsc);
             if(!res.first.is_null()){ list_found_node(my_local_results, k+1, res.first); }
             if(!res.second.is_null()){ list_found_node(my_local_results, k+1, res.second); }
-            if( i > 50){
+            if( i > reduction){
                 node.put(my_local_results);
                 my_local_results = new list<string>;
                 i = 0;
