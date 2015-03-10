@@ -74,10 +74,9 @@ int main(int argc, char** argv){
         if (start == end) return;
         list<string>* my_local_results = new list<string>;
         for(int k = start; k < end; k++){
-            i++;
             pair<node_t, node_t> res = parse_and_check_line(edgelist[k], needles, nsc);
-            if(!res.first.is_null()){ list_found_node(my_local_results, k+1, res.first); }
-            if(!res.second.is_null()){ list_found_node(my_local_results, k+1, res.second); }
+            if(!res.first.is_null()){ list_found_node(my_local_results, k+1, res.first); i++; }
+            if(!res.second.is_null()){ list_found_node(my_local_results, k+1, res.second); i++; }
             if( i > reduction){
                 node.put(my_local_results);
                 my_local_results = new list<string>;
@@ -94,7 +93,7 @@ int main(int argc, char** argv){
     
     // todo: controllare secondo parametro
     ParallelForPipeReduce <list<string>*> pfpipe (nw);
-    if(is_set_granularity(argc) && g < file_length-1 ) {
+    if(is_set_granularity(argc) && g 234nw < file_length-1 ) {
         // dynamic scheduling with stride g and par deg nw
         pfpipe.parallel_reduce_idx(0,file_length-1, 1, g, workerF, mergerF);
     } else {
