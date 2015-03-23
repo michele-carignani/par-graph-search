@@ -11,3 +11,11 @@ I_VARS = -mmic -g -std=c++11 -O3 -Wall -DNO_DEFAULT_MAPPING
 # Set FastFlow root
 FF_ROOT = 
 PROFILING_FLAGS = -profile-functions -profile-loops
+
+# Dataset to execute the tests onto (to be manually copied to mic0:data/)
+DATASET = web-BerkStan.txt
+NEEDLES_FILE = web-BerkStan.txt.long.needles
+
+# Snap directories to compile the test using the SNAP framwork
+SNAP_CORE = ../../Snap-2.3/snap-core
+SNAP_GLIB = ../../Snap-2.3/glib-core

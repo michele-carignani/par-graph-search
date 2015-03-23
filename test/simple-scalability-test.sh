@@ -97,3 +97,5 @@ for b in $BINS ; do
     done
 	echo $record
 done
+
+echo -e "\n## Test finished.\n"

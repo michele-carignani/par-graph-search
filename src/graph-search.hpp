@@ -88,9 +88,9 @@ typedef struct str_node_struct {
 #ifdef VEC_STR_EQ
 #pragma ivdep
 #else
-#pragma novec
+#pragma novector
 #endif
-		for(int i = 0; i < MAX_NODE_LENGTH; i++) r += n1.sval[i] - this->sval[i];
+	for(int i = 0; i < MAX_NODE_LENGTH; i++) r += n1.sval[i] - this->sval[i];
 		return r == 0;
 	}
 	
@@ -117,9 +117,6 @@ typedef int_node_t node_t;
 typedef str_node_t node_t;
 #endif
 
-// todo
-// alignement
-
 /** 
 *    A single task for parallel graph search.
 *    Represents an edge i.e. a line of the graph
@@ -136,10 +133,6 @@ typedef struct single_line_task {
     char* line; /** The edge represented as a string */
     int linenum; /** The position in the graph file */
 } single_task_t;
-
-// todo:
-// merge the two structures
-// alignement
 
 /**
 *   A task composed of many edges (represented as

@@ -1,6 +1,6 @@
 /** 
  * \file farm-no-io.cpp
- * \author: michele.carignani@gmail.com
+ * \author michele.carignani@gmail.com
  *
  */
 
@@ -19,13 +19,16 @@ int main(int argc, char** argv) {
     int nw, g, i, needles_count;
     char* graph_file_path;
     struct timespec start, end;
+    
     #ifdef IO_TIME
     struct timespec end_io;
     #endif
+    
     vector<char*> edgelist;
     ifstream graph_file;
     char buf[100];
 
+    // parse command line or get default parameters
     get_conf(argc, argv, &graph_file_path, &needles, &needles_count, &nw, &g);
 
     if(nw <= 0 || g <= 0 ) {
@@ -34,14 +37,9 @@ int main(int argc, char** argv) {
         exit(1);
     }
     
-    #ifdef DEBUG
-    cout << "Workers num: " << nw << ", Granularity: " << g << " \n";
-    #endif
     
-    // Load edge list into memory
-    
+    // Load edge list (the graph) into memory
     graph_file.open(graph_file_path);
-    
     i = 1;
     graph_file.getline(buf, 100);
     while(graph_file.gcount() != 0){        
@@ -49,11 +47,7 @@ int main(int argc, char** argv) {
         i++;
         graph_file.getline(buf, 100);
     }
-
-    #ifdef IO_TIME
-    clock_gettime(CLOCK_REALTIME, &end_io);
-    #endif
-
+    
 #ifdef PRINT_EXEC_TIME
     float emitter_time = 0, collector_time = 0;
     float* workers_times = new float[nw];
@@ -75,12 +69,7 @@ int main(int argc, char** argv) {
 #else 
         workers_execs[j] = 0; workers_times[j] = 0;
         IteratorWorker* w = new IteratorWorker (&edgelist, needles, needles_count, &(workers_times[j]), &(workers_execs[j])) ;
-#endif
-        
-        #ifdef USE_AFFINITY
-        w->setAffinity(j * 4);
-        #endif
-        
+#endif        
         workers.push_back(w);
     }
     
@@ -90,11 +79,7 @@ int main(int argc, char** argv) {
     if(graph_search_farm.run_and_wait_end()<0) error("running farm");    
     clock_gettime(CLOCK_REALTIME, &end);    
     
-    #ifdef IO_TIME
-    cerr << " : " << elapsed_time_secs(end_io, end);
-    #else 
     cerr << elapsed_time_secs(start, end);
-    #endif
 
 #ifdef PRINT_EXEC_TIME
 
@@ -106,7 +91,6 @@ int main(int argc, char** argv) {
         avg_we += workers_execs[j];
     }
     cerr << "Workers avg: " << (avg_we / nw) << " times,\t" <<  (avg_wt / nw) << " secs,\t"<< (avg_wt / avg_we) <<" avg\n";;
-
 #endif
     return 0;
 }

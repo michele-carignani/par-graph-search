@@ -20,6 +20,10 @@ test_sequential(){
     $BUILD_DIR/seq $1 $2 2>&1
 }
 
+test_sequential_no_io(){ 
+    $BUILD_DIR/seq-no-io $1 $2 2>&1
+}
+
 usage(){
     echo -e "Usage: $0 <graph_file_basename> <nodes_file_basename>\n"
 }
@@ -50,7 +54,7 @@ for n in $NEEDLES ; do
 	fi
 done
 
-echo "Edges; Needles; Granularity; Program; 1; 2; 4; 8; 16; 32; 64"
+echo "Edges; Needles; Granularity; Program; 1; 2; 4; 8; 16; 32; 64; "
 
 for d in $DATASETS; do
 for n in $NEEDLES; do
@@ -59,6 +63,11 @@ seqRes=$( test_sequential "$1.$d" "$2.$n" )
 seqRecordTail="seq "
 for nw in $PAR_DEGS ; do
     seqRecordTail="$seqRecordTail; $seqRes"
+done
+seqnoioRes=$( test_sequential_no_io "$1.$d" "$2.$n" )
+seqnoioRecordTail="seq "
+for nw in $PAR_DEGS ; do
+    seqnoioRecordTail="$seqRecordTail; $seqRes"
 done
 for g in $GRANULARITIES ; do
     echo "$d;$n;$g; $seqRecordTail"

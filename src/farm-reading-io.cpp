@@ -29,17 +29,12 @@ int main(int argc, char* argv[]){
         exit(1);
     }
 
-    #ifdef DEBUG
-    cout << "Workers num: " << nw << ", Granularity: " << g << " \n";
-    #endif
-
 #ifdef PRINT_EXEC_TIME
     float emitter_time = 0, collector_time = 0;
     float* workers_times = new float[nw];
     int emitter_execs = 0, collector_execs = 0;
     int* workers_execs = new int[nw];
 #endif
-    
     
 #ifndef PRINT_EXEC_TIME
     ManyLinesEmitter em (graph_file_path, g);
@@ -57,10 +52,6 @@ int main(int argc, char* argv[]){
         workers_execs[j] = 0; workers_times[j] = 0;
         ManyLinesWorker* w = new ManyLinesWorker (needles, nsc, &(workers_times[j]), &(workers_execs[j])) ;
 #endif
-        
-        #ifdef USE_AFFINITY
-        w->setAffinity(j * 4);
-        #endif
         
         workers.push_back(w);
     }

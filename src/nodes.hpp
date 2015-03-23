@@ -67,8 +67,12 @@ class ManyLinesWorker : public ff::ff_node {
     public:
     ManyLinesWorker (node_t* ns, int nsc) {
 		needles_count = nsc;
+#ifdef PRIV_NEEDLES_COPY
 		needles = (node_t*) malloc(sizeof(node_t) * nsc);
 		memcpy(needles, ns, sizeof(node_t) * nsc);
+#else
+		needles = ns;
+#endif
 	};
 	#ifdef PRINT_EXEC_TIME
 	ManyLinesWorker(node_t* ns, int nsc, float* ex_secs, int* execs) : 
