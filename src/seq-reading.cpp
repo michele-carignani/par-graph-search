@@ -1,5 +1,5 @@
-/** \file seq.cpp
-*   \author Michele Carignani <michele.carignani@gmail.com>
+/** \file: seq.cpp
+*	\author Michele Carignani <michele.carignani@gmail.com>
 */
 #include <fstream>
 #include <iostream>
@@ -28,35 +28,32 @@ list<string> results;
 */	
 
 int main(int argc, char* argv[]){
-    int nsc = 0;
+
     ifstream graph_file;
+    int linenum, nsc;
     char buf[BUF_LEN];
     struct timespec start, end;
-    vector<char *> edgelist;
+
+    clock_gettime(CLOCK_REALTIME, &start);
 
     load_needles_list(argc, argv, &needles, &nsc);
 
     graph_file.open(argv[GRAPH_FILENAME_IDX]);
-    
-    // Load the file in memory
-    graph_file.getline(buf, 100);
-    while(graph_file.gcount() != 0){ 
-        edgelist.push_back(strdup(buf));
-        graph_file.getline(buf, 100);
-    }
-    
-    clock_gettime(CLOCK_REALTIME, &start);
-    for(unsigned int j = 0; j < edgelist.size();  j++){
-        
-        pair<node_t,node_t> found = parse_and_check_line(edgelist[j], needles, nsc);
+    graph_file.getline(buf, BUF_LEN);
+    linenum = 1;
+    while(graph_file.gcount() != 0){
+        pair<node_t,node_t> found = parse_and_check_line(buf, needles, nsc);
         
         if(!found.first.is_null()){
-            list_found_node(&results , j+1, found.first);
+            list_found_node(&results , linenum, found.first);
         }
         if(!found.second.is_null()){
-            list_found_node(&results, j+1, found.second);
+            list_found_node(&results, linenum, found.second);
         }
+        linenum++;
+        graph_file.getline(buf, BUF_LEN);
     }
+
     clock_gettime(CLOCK_REALTIME, &end);
 
 #ifdef PRINT_RESULTS

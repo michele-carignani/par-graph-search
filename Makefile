@@ -9,25 +9,25 @@ include Makefile.conf
 # BUILD TARGETS
 
 utils: src/utils.hpp src/utils.cpp src/graph-search.hpp
-	$(CXX) $(C_VARS) src/$@.cpp -c -I$(FF_ROOT) -o src/$@.o
+	$(CXX) $(CXXFLAGS) src/$@.cpp -c -I$(FF_ROOT) -o src/$@.o
 
 nodes: src/nodes.hpp src/nodes.cpp src/graph-search.hpp
-	$(CXX) $(C_VARS) src/$@.cpp -c -I$(FF_ROOT) -o src/$@.o
+	$(CXX) $(CXXFLAGS) src/$@.cpp -c -I$(FF_ROOT) -o src/$@.o
 	
 seq: utils src/seq.cpp
-	$(CXX) $(C_VARS) src/$@.cpp src/utils.o -o build/$@ -lrt
+	$(CXX) $(CXXFLAGS) src/$@.cpp src/utils.o -o build/$@ -lrt
 
 seq-no-io: utils src/seq-no-io.cpp
-	$(CXX) $(C_VARS) src/$@.cpp src/utils.o -o build/$@ -lrt
+	$(CXX) $(CXXFLAGS) src/$@.cpp src/utils.o -o build/$@ -lrt
 
 farm : nodes utils src/farm.cpp
-	$(CXX) $(C_VARS) src/$@.cpp src/nodes.o src/utils.o -I$(FF_ROOT) -o build/$@ -lpthread -lrt
+	$(CXX) $(CXXFLAGS) src/$@.cpp src/nodes.o src/utils.o -I$(FF_ROOT) -o build/$@ -lpthread -lrt
 
 map : utils src/map.cpp
-	$(CXX) $(C_VARS) src/$@.cpp src/utils.o -I$(FF_ROOT) -o build/$@ -lpthread -lrt
+	$(CXX) $(CXXFLAGS) src/$@.cpp src/utils.o -I$(FF_ROOT) -o build/$@ -lpthread -lrt
 
 farm-no-io :nodes utils src/farm-no-io.cpp
-	$(CXX) $(C_VARS) src/$@.cpp src/nodes.o src/utils.o -I$(FF_ROOT) -o build/$@ -lpthread -lrt
+	$(CXX) $(CXXFLAGS) src/$@.cpp src/nodes.o src/utils.o -I$(FF_ROOT) -o build/$@ -lpthread -lrt
 
 # BUILD TARGETS FOR MIC (XEON PHI)
 
@@ -41,7 +41,7 @@ seq-mic: utils-mic src/seq.cpp
 	$(ICC) $(I_VARS) src/$(subst -mic,,$@).cpp src/mic/utils.o -o build/mic/$(subst -mic,,$@) -lrt
 
 seq-no-io-mic: utils-mic src/seq-no-io.cpp
-	$(ICC) $(I_VARS) src/$(subst -mic,,$@).cpp src/utils.o -o build/$(subst -mic,,$@) -lrt
+	$(ICC) $(I_VARS) src/$(subst -mic,,$@).cpp src/mic/utils.o -o build/mic/$(subst -mic,,$@) -lrt
 
 farm-mic : nodes-mic utils-mic src/farm.cpp
 	$(ICC) $(I_VARS) -I$(FF_ROOT) src/$(subst -mic,,$@).cpp src/mic/utils.o src/mic/nodes.o -o build/mic/$(subst -mic,,$@) -lpthread -lrt
@@ -57,13 +57,18 @@ all: seq seq-no-io farm map farm-no-io profile
 all-mic: seq-mic seq-no-io-mic farm-mic map-mic farm-no-io-mic profile-mic
 
 profile: utils
-	$(CXX) $(C_VARS) src/profile.cpp src/utils.o -o build/profile -lrt
+	$(CXX) $(CXXFLAGS) src/profile.cpp src/utils.o -o build/profile -lrt
 
 profile-mic: utils-mic
 	$(ICC) $(I_VARS) src/profile.cpp src/mic/utils.o -o build/mic/profile -lrt
 
+# CXXFLAGS = -std=c++11 -O3 -DNDEBUG
 snap-test: utils
-	$(CXX) $(C_VARS) -I$(SNAP_CORE) -I$(SNAP_GLIB) src/snap_test.cpp src/utils.o -o build/snap-test
+	$(CXX) $(CXXFLAGS) -o build/snap_test src/snap_test.cpp src/utils.o ../snap/snap-core/Snap.o -I../snap/snap-core -I../snap/glib-core -lrt
+
+deploy-mic :
+	@for i in $(ls build/mic) ; scp build/mic/$i mic0:build/mic/$i ; done
+	@scp test/simple-scalability-test.sh mic0:test/
 
 doxy:
 	doxygen docs/doxy.conf
@@ -71,7 +76,7 @@ doxy:
 # TESTING TARGETS
 
 DATASET = web-BerkStan.txt
-NEEDLES_FILE = web-BerkStan.txt.needles
+NEEDLES_FILE = web-BerkStan.txt.long.needles
 
 MIC_PREFIX_DIR=par-grap-searh
 
@@ -82,15 +87,15 @@ test-scale:
 	@echo -e "\nRunning tests"
 	@bash tests/scalability-test.sh data/$(DATASET) data/$(NEEDLES_FILE) > TEST_SCALE_RESULTS &
 
-tests-scale-mic:
+test-mic:
 	@echo -e "\nBuilding executables.."
 	@make all-mic
 
-	bash test/prepare-test.sh $(MIC_PREFIX_DIR) $(DATASET) $(NEEDLES_FILE)
+	@make deploy
 
 	@echo -e "\nRunning test!"
-	@ssh mic0 "cd $(MIC_PREFIX_DIR); bash test/scalability-test.sh data/$(DATASET) data/$(NEEDLES_FILE) > TEST_SCALE_RESULTS &"
+	@ssh mic0 "bash test/simple-scalability-test.sh data/$(DATASET) data/$(NEEDLES_FILE)" >TEST_MIC_RESULTS_$(date "+%F-%H:%M") &
 	@echo -e "Test running. Results in the TEST_SCALE_RESULTS file"
 
 test-correctness:
-	@./test/correctness.sh data/fake-graph.txt{,.needles,.result}
+	@./test/correctness.sh data/	fake-graph.txt{,.needles,.result}
