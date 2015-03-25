@@ -72,23 +72,30 @@ int main(int argc, char** argv){
             const int thid, ff_buffernode &node ){
         int i = 0;
         if (start == end) return;
-        list<string>* my_local_results = new list<string>;
+        // list<string>* my_local_results = new list<string>;
         for(int k = start; k < end; k++){
             pair<node_t, node_t> res = parse_and_check_line(edgelist[k], needles, nsc);
-            if(!res.first.is_null()){ list_found_node(my_local_results, k+1, res.first); i++; }
-            if(!res.second.is_null()){ list_found_node(my_local_results, k+1, res.second); i++; }
-            if( i > reduction){
-                node.put(my_local_results);
-                my_local_results = new list<string>;
-                i = 0;
+            if(!res.first.is_null()){ 
+                // list_found_node(my_local_results, k+1, res.first); i++; 
+                node.put(new pair<node_t,int>(res.first, k+1););
             }
+            if(!res.second.is_null()){ 
+                // list_found_node(my_local_results, k+1, res.second); i++; 
+                node.put(new pair<node_t,int>(res.second, k+1););
+            }
+            // if( i > reduction){
+                // node.put(my_local_results);
+                // my_local_results = new list<string>;
+                // i = 0;
+            // }
         }
-        node.put(my_local_results);
+        // node.put(my_local_results);
     };
     
-    auto mergerF = [&results](list<string>* partial){
-        results.merge( *partial );
-        delete partial;
+    auto mergerF = [&results](pair<node_t, int>* t){
+        // results.merge( *partial );
+        list_found_node(results, t.first, t.second)
+        delete t;
     };
     
     // todo: controllare secondo parametro
