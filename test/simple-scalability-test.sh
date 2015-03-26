@@ -10,7 +10,7 @@
 #
 
 BUILD_DIR=./build
-BINS="farm map farm-no-io"
+BINS="farm map-reduce"
 
 DEFAULT_GRANULARITY=30000
 
@@ -25,14 +25,6 @@ test_sequential(){
     $BUILD_DIR/seq $1 $2 2>&1
 }
 
-test_sequential_no_io(){ 
-    $BUILD_DIR/seq-no-io $1 $2 2>&1
-}
-
-test_grep_version(){
-	time grep -f $2 $1 > 
-}
-
 usage(){
     echo -e "Usage: $0 <graph_file_basename> <nodes_file_basename> [<on_phi>]\n"
 }
@@ -42,14 +34,16 @@ if [ $# -lt 2 ] ; then
     exit 0
 fi
 
-if [ $3 = '1' ] ; then
+if [ $3 = 'mic' ] ; then
 	PAR_DEGS="1 2 4 8 16 32 64 128 238"
 	header="Program; 1; 2; 4; 8; 16; 32; 64; 128; 238"
 else
-	PAR_DEGS="1 2 4 8 16"
+	PAR_DEGS="1 2 4 8 14"
 	header="Program; 1; 2; 4; 8; 14"
 fi
 
+date
+echo
 echo "# Completion times in seconds of the different parallel and sequential versions"
 echo "# using parallelism degree."
 echo "# First line describes the format of the CSV records (semicolon separated)."
@@ -76,14 +70,6 @@ echo $header
 # Test the sequential version and print it many times
 seqRes=$( test_sequential "$1" "$2" )
 seqRecordTail="seq "
-for nw in $PAR_DEGS ; do
-    seqRecordTail="$seqRecordTail; $seqRes"
-done
-echo $seqRecordTail
-
-# Test the sequential no IO version and print it many times
-seqRes=$( test_sequential_no_io "$1" "$2" )
-seqRecordTail="seq-no-io "
 for nw in $PAR_DEGS ; do
     seqRecordTail="$seqRecordTail; $seqRes"
 done

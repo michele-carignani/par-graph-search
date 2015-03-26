@@ -16,7 +16,7 @@ RESULTS_FILE=$3
 
 BIN_DIR=./build
 TMP_DIR=/tmp
-BINS="seq seq-no-io farm farm-no-io map"
+BINS="seq farm map-reduce"
 
 sorted_res=$TMP_DIR/$(basename $RESULTS_FILE).sorted
 sort $RESULTS_FILE > $sorted_res

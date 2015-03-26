@@ -48,7 +48,7 @@ void load_needles_list(int argc, char** argv, node_t** needles, int* needles_cou
     }
     
 #ifdef ON_MIC
-    *needles = __mm_malloc(nl.size() * sizeof(node_t),64);
+    *needles = _mm_malloc(nl.size() * sizeof(node_t),64);
 #else  
     *needles = (node_t*) malloc(nl.size() * sizeof(node_t));
 #endif

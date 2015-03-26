@@ -11,7 +11,118 @@ using namespace std;
 using namespace ff;
 
 
+/* ************************ ITERATOR EMITTER ******************************** */
+
+void* IteratorEmitter::svc(void* t){
+
+#ifdef PRINT_EXEC_TIME
+    struct timespec start, end;
+    clock_gettime(CLOCK_REALTIME, &start);
+    *svc_executions = *svc_executions + 1;
+#endif
+    
+    bool finish = false;
+    unsigned int last = curr + granularity;
+    if(last > graph->size()){
+        last  = graph->size();
+        finish = true;
+    }
+   
+    long tsk = embed_ints(curr, last);
+    assert(tsk != 0);
+    assert(tsk != (long) GO_ON);
+    assert(tsk != (long) EOS);
+    ff_send_out((void*) tsk);
+    curr = last;
+    
+    if(finish){
+        return EOS;
+    }
+    
+    #ifdef PRINT_EXEC_TIME
+    clock_gettime(CLOCK_REALTIME, &end);
+    *executed_secs += elapsed_time_secs(start, end);
+    #endif
+
+    return GO_ON;
+}
+
+/* ************************ ITERATOR WORKER ********************************* */
+
+void* IteratorWorker::svc(void* t){
+    pair<node_t,node_t> found;
+    int task_start = split_first((long) t);
+    int task_end = split_second((long) t);
+    
+    #ifdef PRINT_EXEC_TIME
+    struct timespec start, end;
+    clock_gettime(CLOCK_REALTIME, &start);
+    *svc_executions = *svc_executions + 1;
+    #endif
+    
+    for(int k = task_start; k < task_end; k++){
+        found = parse_and_check_line( (*graph)[k], needles, needles_count);
+    
+        if(!found.first.is_null()){
+            pair<node_t,int>* res =  new pair<node_t,int>(found.first, k+1);
+            ff_send_out(res);
+        }
+
+        if(!found.second.is_null()){
+            pair<node_t,int>* res =  new pair<node_t,int>(found.second, k+1);
+            ff_send_out(res);
+        }
+    
+    }
+    
+    #ifdef PRINT_EXEC_TIME
+    clock_gettime(CLOCK_REALTIME, &end);
+    *executed_secs += elapsed_time_secs(start, end);
+    #endif
+    
+    return GO_ON;
+}
+
+/* ***************************** COLLECTOR ********************************** */
+
+void * Collector::svc(void * t){
+
+    #ifdef PRINT_EXEC_TIME
+    timespec start, end;
+    clock_gettime(CLOCK_REALTIME, &start);
+    *svc_executions = *svc_executions + 1;
+    #endif
+   
+    pair<node_t,int>* res = (pair<node_t,int>*) t;
+    char res_str[50];
+    char* str_val = res->first.str();
+    sprintf(res_str,"%d : %s", res->second, str_val);
+    free(str_val);
+    found_nodes.push_back(string(res_str));
+    delete res;
+    
+    #ifdef PRINT_EXEC_TIME
+    clock_gettime(CLOCK_REALTIME, &end);
+    *executed_secs += elapsed_time_secs(start, end);
+    #endif
+
+    return GO_ON;
+}
+
+void Collector::print_res(){
+    for(auto x: found_nodes){
+        cout << x << "\n";
+    }
+}
+
+void Collector::svc_end(){
+#ifdef PRINT_RESULTS
+    print_res();
+#endif
+}
+
 /* ************************  MANY LINES EMITTER **************************** */
+// Used in the farm-reading program
 
 /* Constructor  */
 ManyLinesEmitter::ManyLinesEmitter(char* pathname, int g){
@@ -123,116 +234,3 @@ void ManyLinesWorker::svc_end(){
     // cerr << "Worker " << get_my_id() << " executed " << *executed_secs << " secs\n";
 #endif
 }
-
-/* ***************************** COLLECTOR ********************************** */
-
-void * Collector::svc(void * t){
-
-    #ifdef PRINT_EXEC_TIME
-    timespec start, end;
-    clock_gettime(CLOCK_REALTIME, &start);
-    *svc_executions = *svc_executions + 1;
-    #endif
-   
-    pair<node_t,int>* res = (pair<node_t,int>*) t;
-    char res_str[50];
-    char* str_val = res->first.str();
-    sprintf(res_str,"%d : %s", res->second, str_val);
-    free(str_val);
-    found_nodes.push_back(string(res_str));
-    delete res;
-    
-    #ifdef PRINT_EXEC_TIME
-    clock_gettime(CLOCK_REALTIME, &end);
-    *executed_secs += elapsed_time_secs(start, end);
-    #endif
-
-    return GO_ON;
-}
-
-void Collector::print_res(){
-    for(auto x: found_nodes){
-        cout << x << "\n";
-    }
-}
-
-void Collector::svc_end(){
-#ifdef PRINT_RESULTS
-    print_res();
-#endif
-}
-
-/* ************************ ITERATOR EMITTER ******************************** */
-
-void* IteratorEmitter::svc(void* t){
-
-#ifdef PRINT_EXEC_TIME
-    struct timespec start, end;
-    clock_gettime(CLOCK_REALTIME, &start);
-    *svc_executions = *svc_executions + 1;
-#endif
-    
-    bool finish = false;
-    unsigned int last = curr + granularity;
-    if(last > graph->size()){
-        last  = graph->size();
-        finish = true;
-    }
-   
-    long tsk = embed_ints(curr, last);
-    assert(tsk != 0);
-    assert(tsk != (long) GO_ON);
-    assert(tsk != (long) EOS);
-    ff_send_out((void*) tsk);
-    curr = last;
-    
-    if(finish){
-        return EOS;
-    }
-    
-    #ifdef PRINT_EXEC_TIME
-    clock_gettime(CLOCK_REALTIME, &end);
-    *executed_secs += elapsed_time_secs(start, end);
-    #endif
-
-    return GO_ON;
-}
-
-/* ************************ ITERATOR WORKER ********************************* */
-
-void* IteratorWorker::svc(void* t){
-    pair<node_t,node_t> found;
-    int task_start = split_first((long) t);
-    int task_end = split_second((long) t);
-    
-    #ifdef PRINT_EXEC_TIME
-    struct timespec start, end;
-    clock_gettime(CLOCK_REALTIME, &start);
-    *svc_executions = *svc_executions + 1;
-    #endif
-    
-    for(int k = task_start; k < task_end; k++){
-        found = parse_and_check_line( (*graph)[k], needles, needles_count);
-    
-        if(!found.first.is_null()){
-            pair<node_t,int>* res =  new pair<node_t,int>(found.first, k+1);
-            ff_send_out(res);
-        }
-
-        if(!found.second.is_null()){
-            pair<node_t,int>* res =  new pair<node_t,int>(found.second, k+1);
-            ff_send_out(res);
-        }
-    
-    }
-    
-    #ifdef PRINT_EXEC_TIME
-    clock_gettime(CLOCK_REALTIME, &end);
-    *executed_secs += elapsed_time_secs(start, end);
-    #endif
-    
-    return GO_ON;
-}
-
-/* ********************* BYTES_EMITTER ************************************** */
-

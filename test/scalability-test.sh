@@ -4,13 +4,9 @@
 #
 
 BUILD_DIR=./build
-BINS="farm map farm-no-io"
+BINS="farm map-reduce"
 
-PAR_DEGS="1 2 4 8 16 32 64 128 238"
-GRANULARITIES="300 3000 30000"
-
-DATASETS="100 10000 1M 7M"
-NEEDLES="2 100 250"
+GRANULARITIES="300 3000 30000 300000"
 
 par_test() {
     $BUILD_DIR/$1 $2 $3 $4 $5 2>&1
@@ -18,10 +14,6 @@ par_test() {
 
 test_sequential(){ 
     $BUILD_DIR/seq $1 $2 2>&1
-}
-
-test_sequential_no_io(){ 
-    $BUILD_DIR/seq-no-io $1 $2 2>&1
 }
 
 usage(){
@@ -33,6 +25,8 @@ if [ $# -lt 2 ] ; then
     exit 0
 fi
 
+date
+echo
 echo "# Completion times in seconds of the different parallel and sequential versions"
 echo "# using different computation grains and parallelism degree."
 echo "# First line describes the format of the CSV records (semicolon separated)."
@@ -54,33 +48,36 @@ for n in $NEEDLES ; do
 	fi
 done
 
-echo "Edges; Needles; Granularity; Program; 1; 2; 4; 8; 16; 32; 64; "
+if [ $3 = 'mic' ] ; then
+	PAR_DEGS="1 2 4 8 16 32 64 128 238"
+	header="Program; Grain; 1; 2; 4; 8; 16; 32; 64; 128; 238"
+else
+	PAR_DEGS="1 2 4 8 14"
+	header="Program; Grain; 1; 2; 4; 8; 14"
+fi
 
-for d in $DATASETS; do
-for n in $NEEDLES; do
-$BUILD_DIR/profile none $2.$n
-seqRes=$( test_sequential "$1.$d" "$2.$n" )
+
+echo $header
+
+
+$BUILD_DIR/profile none $2
+
+seqRes=$( test_sequential "$1" "$2" )
 seqRecordTail="seq "
 for nw in $PAR_DEGS ; do
     seqRecordTail="$seqRecordTail; $seqRes"
 done
-seqnoioRes=$( test_sequential_no_io "$1.$d" "$2.$n" )
-seqnoioRecordTail="seq "
-for nw in $PAR_DEGS ; do
-    seqnoioRecordTail="$seqRecordTail; $seqRes"
-done
+
 for g in $GRANULARITIES ; do
-    echo "$d;$n;$g; $seqRecordTail"
+    echo "$g; $seqRecordTail"
     for b in $BINS ; do
-        record="$d;$n;$g; $b"
+        record="$g; $b"
         for nw in $PAR_DEGS ; do
-            res=$( par_test $b "$1.$d" "$2.$n" $nw $g )
+            res=$( par_test $b "$1" "$2" $nw $g )
             record="$record; $res"
         done
         echo $record
     done
-done
-done
 done
 
 echo -e "\n# TESTS COMPLETED"
